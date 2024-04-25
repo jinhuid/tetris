@@ -149,6 +149,7 @@ export class Brick implements BrickType {
         newStructure[y][x] = this.structure[i][j]
       }
     }
+    console.log(newStructure);
     newStructure = newStructure.map((s) => s.join("")) as BrickStruct
     const newBinary = this.getBinary(newStructure, this.x)
     if (this.isOverlap(mapBinary, newBinary)) return

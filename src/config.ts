@@ -2,7 +2,7 @@ export const gameParam = {
   column: 10,
   row: 20,
   FPS: 165,
-  speed: 1,
+  speed: 0,
   keySpeed: 10,
   score: 0,
   get brickWidth() {
@@ -20,7 +20,7 @@ export const bricks = {
   },
   i: {
     color: "#F7E9D4" as const,
-    struct: ["0100", "0100", "0100", "0100"] as Binary<4>[],
+    struct: ["0000", "1111", "0000", "0000"] as Binary<4>[],
   },
   s: {
     color: "#C8E6C9" as const,
@@ -32,15 +32,15 @@ export const bricks = {
   },
   l: {
     color: "#FFCC80" as const,
-    struct: ["100", "100", "110"] as Binary<3>[],
+    struct: ["001", "111", "000"] as Binary<3>[],
   },
   j: {
     color: "#FFEE58" as const,
-    struct: ["010", "010", "110"] as Binary<3>[],
+    struct: ["100", "111", "000"] as Binary<3>[],
   },
   t: {
     color: "#CE93D8" as const,
-    struct: ["111", "010", "000"] as Binary<3>[],
+    struct: ["000", "111", "010"] as Binary<3>[],
   },
 }
 
@@ -77,3 +77,4 @@ export type Binary<
 export type BrickLetter = keyof typeof bricks
 export type BrickColor = (typeof bricks)[BrickLetter]["color"]
 export type BrickStruct = (typeof bricks)[BrickLetter]["struct"]
+
