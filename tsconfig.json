@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "useDefineForClassFields": true,
+    "noImplicitAny": true,
+    "lib": ["esnext", "dom"],
+  }
+}
