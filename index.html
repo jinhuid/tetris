@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0px;
+        padding: 0px;
+        /* background-color: #eee; */
+        overflow: hidden;
+      }
+      .cvs {
+        height: 100%;
+        width: 100%;
+        background-size: 100% 100%;
+        transform: scale(0.63);
+        transform-origin: left top;
+        position: absolute;
+        left: 1.9rem;
+        top: calc(100vh * 200 / 844);
+      }
+      .brick,
+      .next {
+        background-color: transparent;
+      }
+      .next {
+        opacity: 0.3;
+      }
+      .pos{
+        background-color: rgb(226,233,175);
+      }
+      #box {
+        position: relative;
+        height: 100vh;
+        background-size: 100% 100%;
+        background-color: rgb(25,24,25);
+      }
+      @media screen and (orientation: landscape) {
+        #box {
+          /* 宽高比9:16 */
+          aspect-ratio: 9 / 18;
+          margin: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="box">
+      <canvas class="cvs pos"></canvas>
+      <canvas class="cvs brick"></canvas>
+      <canvas class="cvs next"></canvas>
+    </div>
+    <script>
+      const cvs = document.querySelector(".cvs.brick")
+      const posCvs = document.querySelector(".cvs.pos")
+      const next = document.querySelector(".next")
+      const ctx = cvs.getContext("2d")
+      const posCtx = posCvs.getContext("2d")
+      const nextCtx = next.getContext("2d")
+
+      next.height = 80
+      next.width = 80
+      const resize = () => {
+        cvs.height =
+          posCvs.height =
+          next.height =
+            window.innerHeight > window.innerWidth
+              ? ((window.innerWidth * 16) / 9) * devicePixelRatio
+              : window.innerHeight * devicePixelRatio
+        cvs.width = posCvs.width = next.width = (cvs.height * 9) / 16
+      }
+
+      resize()
+      window.onresize = resize
+
+      const config = {
+        widthNum: 10,
+        heightNum: 20,
+        FPS: 165,
+        speed: 2,
+        keySpeed: 10,
+        score: 0,
+        bricks: {
+          o: {
+            color: "#FADADD",
+            struct: ["11", "11"],
+          },
+          i: {
+            color: "#F7E9D4",
+            struct: ["0100", "0100", "0100", "0100"],
+          },
+          s: {
+            color: "#C8E6C9",
+            struct: ["011", "110", "000"],
+          },
+          z: {
+            color: "#B3E5FC",
+            struct: ["110", "011", "000"],
+          },
+          l: {
+            color: "#FFCC80",
+            struct: ["100", "100", "110"],
+          },
+          j: {
+            color: "#FFEE58",
+            struct: ["010", "010", "110"],
+          },
+          t: {
+            color: "#CE93D8",
+            struct: ["111", "010", "000"],
+          },
+        },
+        control: {
+          left: ["a", "ArrowLeft"],
+          right: ["d", "ArrowRight"],
+          up: ["w", "ArrowUp"],
+          down: ["s", "ArrowDown"],
+          bottom: [" "],
+        },
+        onceKey: ["up", "bottom"],
+        speedUpKey: ["down"],
+        pause: "Enter",
+        get brickWidth() {
+          return cvs.width / this.widthNum
+        },
+        get brickHeight() {
+          return cvs.height / this.heightNum
+        },
+      }
+
+      const pos = Array.from({ length: config.heightNum }, (_) => 0)
+      const colorPos = Array.from(
+        { length: config.heightNum },
+        () => new Array(config.widthNum)
+      )
+
+      const drawBrick = (ctx, x, y, width, height, color) => {
+        // 定义圆角矩形的位置和大小
+        var radius = 8 * devicePixelRatio // 圆角半径
+        var borderWidth = 5 * devicePixelRatio // 边框宽度
+
+        // 绘制填充区域
+        ctx.fillStyle = color // 设置填充颜色
+        ctx.beginPath() // 开始路径
+        ctx.moveTo(x + radius, y) // 移动到左上角顶点
+        ctx.lineTo(x + width - radius, y) // 绘制顶部直线
+        ctx.arcTo(x + width, y, x + width, y + radius, radius) // 绘制右上角圆弧
+        ctx.lineTo(x + width, y + height - radius) // 绘制右侧直线
+        ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius) // 绘制右下角圆弧
+        ctx.lineTo(x + radius, y + height) // 绘制底部直线
+        ctx.arcTo(x, y + height, x, y + height - radius, radius) // 绘制左下角圆弧
+        ctx.lineTo(x, y + radius) // 绘制左侧直线
+        ctx.arcTo(x, y, x + radius, y, radius) // 绘制左上角圆弧
+        ctx.fill() // 填充颜色
+
+        // 绘制边框
+        ctx.strokeStyle = "#000000" // 设置边框颜色
+        ctx.lineWidth = borderWidth // 设置边框宽度
+        ctx.beginPath() // 开始路径
+        ctx.moveTo(x + radius, y) // 移动到左上角顶点
+        ctx.lineTo(x + width - radius, y) // 绘制顶部直线
+        ctx.arcTo(x + width, y, x + width, y + radius, radius) // 绘制右上角圆弧
+        ctx.lineTo(x + width, y + height - radius) // 绘制右侧直线
+        ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius) // 绘制右下角圆弧
+        ctx.lineTo(x + radius, y + height) // 绘制底部直线
+        ctx.arcTo(x, y + height, x, y + height - radius, radius) // 绘制左下角圆弧
+        ctx.lineTo(x, y + radius) // 绘制左侧直线
+        ctx.arcTo(x, y, x + radius, y, radius) // 绘制左上角圆弧
+        ctx.stroke() // 绘制边框
+
+        // 关闭路径
+        ctx.closePath()
+      }
+
+      const drawLetter = (ctx, { x, y, width, height, color, structure }) => {
+        for (let i = 0; i < structure.length; i++) {
+          for (let j = 0; j < structure[i].length; j++) {
+            if (structure[i][j] == "0") continue
+            drawBrick(
+              ctx,
+              (x + j) * width,
+              (y + i) * height,
+              width,
+              height,
+              color
+            )
+          }
+        }
+      }
+
+      const getRandomLetter = (bricks) => {
+        const letters = Object.keys(bricks)
+        return letters[(Math.random() * letters.length) >> 0]
+      }
+
+      const getStructBinary = (structure, x) => {
+        const binary = []
+        const len = structure[0].length
+        for (let i = structure.length - 1; i >= 0; i--) {
+          let r
+          let carry = config.widthNum - x - len
+          if (carry >= 0) {
+            r = parseInt(structure[i], 2) << carry
+          } else {
+            r = parseInt(structure[i], 2) >> -carry
+          }
+          binary.unshift(r)
+        }
+        return binary
+      }
+
+      class CreateBrick {
+        constructor({ bricks, widthNum, brickWidth, brickHeight }) {
+          this.width = brickWidth
+          this.height = brickHeight
+          this.letter = getRandomLetter(bricks)
+          this.color = bricks[this.letter].color
+          this.structure = bricks[this.letter].struct
+          this.x = widthNum / 2 - 1
+          this.y = 0
+        }
+        get binary() {
+          return getStructBinary(this.structure, this.x)
+        }
+        draw(ctx) {
+          drawLetter(ctx, this)
+        }
+        update() {
+          this.y++
+        }
+        left() {
+          if (this.inBorder("left")) return
+          this.x--
+          if (this.isOverlap()) {
+            this.x++
+          }
+        }
+        right() {
+          if (this.inBorder("right")) return
+          this.x++
+          if (this.isOverlap()) {
+            this.x--
+          }
+        }
+        downOne() {
+          this.y++
+          if (!canDown(this.binary)) {
+            record(this.binary)
+          }
+        }
+        downBottom() {
+          while (canDown(this.binary)) {
+            this.update()
+          }
+          record(this.binary)
+        }
+        rotate() {
+          const len = this.structure[0].length
+          let newStructure = Array.from({ length: len }, () => new Array(len))
+          for (let i = 0; i < this.structure.length; i++) {
+            for (let j = 0; j < this.structure[i].length; j++) {
+              let x = i,
+                y = len - 1 - j
+              if (
+                this.structure[i][j] === "1" &&
+                (x + this.x >= config.widthNum ||
+                  x + this.x < 0 ||
+                  y + this.y >= config.heightNum)
+              )
+                return
+              newStructure[y][x] = this.structure[i][j]
+            }
+          }
+          newStructure = newStructure.map((s) => s.join(""))
+          console.log(newStructure)
+          const newBinary = getStructBinary(newStructure, this.x)
+          if (!canDown(newBinary) || this.isOverlap(newBinary)) return
+          this.structure = newStructure
+        }
+        isOverlap(binary) {
+          binary = binary || this.binary
+
+          for (let i = binary.length - 1; i >= 0; i--) {
+            if (binary[i] & pos[this.y + i]) {
+              return true
+            }
+          }
+          return false
+        }
+        inBorder(direction) {
+          let binary = this.binary
+          let settle =
+            direction == "left" ? Math.pow(2, config.widthNum - 1) : 1
+          for (let i = binary.length - 1; i >= 0; i--) {
+            if (binary[i] & settle) {
+              return true
+            }
+          }
+        }
+      }
+      //11000   00111
+
+      const eliminate = (pos, colorPos, config) => {
+        let r = Math.pow(2, config.widthNum) - 1
+        for (let i = pos.length - 1; i >= 0; i--) {
+          if (pos[i] === r) {
+            pos.splice(i, 1)
+            pos.unshift(0)
+            colorPos.splice(i, 1)
+            colorPos.unshift(new Array(config.widthNum))
+            updateScore(config.score++)
+            updatePos()
+          }
+        }
+      }
+
+      const updatePos = () => {
+        posCtx.clearRect(0, 0, posCvs.width, posCvs.height)
+        drawPos(posCtx, pos, colorPos, config)
+      }
+
+      const updateScore = (score) => {
+        ctx.fillStyle = "red" // 设置文字颜色
+        ctx.font = `${devicePixelRatio * 20}px Arial` // 设置文字样式
+        ctx.lineWidth = 2
+        ctx.fillText(
+          `score:${score}`,
+          cvs.width - 100 * devicePixelRatio,
+          50 * devicePixelRatio
+        )
+      }
+
+      /**
+       * 比同层 没有同层 直接返回false
+       * 111
+       * 010
+       * 000
+       * 这种情况 y+i会下标越界
+       */
+      const canDown = (binary) => {
+        for (let i = binary.length - 1; i >= 0; i--) {
+          if ((pos[brick.y + i] ?? 2 ** config.widthNum - 1) & binary[i]) {
+            return false
+          }
+        }
+        return true
+      }
+
+      const record = (binary) => {
+        for (let i = binary.length - 1; i >= 0; i--) {
+          if (binary[i] === 0) continue
+          pos[brick.y + i - 1] |= binary[i]
+          for (
+            let j = config.widthNum - 1, r = binary[i];
+            r !== 0;
+            j--, r >>= 1
+          ) {
+            if (r & 1) {
+              colorPos[brick.y + i - 1][j] = brick.color
+            }
+          }
+        }
+        updatePos()
+        brick = nextBrick
+        nextBrick = new CreateBrick(config)
+        // if(!canDown(brick.binary)){
+        // 	console.log('结束');
+        // }
+      }
+
+      const drawPos = function (ctx, map, colors, { brickWidth, brickHeight }) {
+        for (let i = 0; i < map.length; i++) {
+          for (let j = config.widthNum - 1, r = map[i]; r !== 0; j--, r >>= 1) {
+            if (r & 1) {
+              drawBrick(
+                ctx,
+                j * brickWidth,
+                i * brickHeight,
+                brickWidth,
+                brickHeight,
+                colors[i][j]
+              )
+            }
+          }
+        }
+      }
+      let brick = new CreateBrick(config)
+      let nextBrick = new CreateBrick(config)
+
+      const customRaf = (fn, fps) => {
+        let lastTime = Date.now()
+        const interval = 1000 / fps
+        let timer = null
+        function raf(...args) {
+          let run
+          if (!!fps) {
+            run = () => {
+              const currentTime = Date.now()
+              const deltaTime = currentTime - lastTime
+              if (deltaTime >= interval) {
+                fn.apply(this, args)
+                lastTime = currentTime - (deltaTime % interval)
+              }
+            }
+          } else {
+            run = () => fn.apply(this, args)
+          }
+          const update = () => {
+            run()
+            timer = requestAnimationFrame(update)
+          }
+          cancel()
+          update()
+        }
+        function cancel() {
+          cancelAnimationFrame(timer)
+        }
+        return [raf, cancel]
+      }
+
+      function throttle(fn, delay) {
+        let timer = null
+        return function (...args) {
+          if (timer) return
+          timer = setTimeout(() => {
+            fn.apply(this, args)
+            timer = null
+          }, delay)
+        }
+      }
+
+      const brickUpdate = (function () {
+        const fn = throttle(function () {
+          brick.update()
+          if (!canDown(brick.binary)) {
+            record(brick.binary)
+          }
+        }, 1000 / config.speed)
+        return function brickUpdate() {
+          brick.draw(ctx)
+          fn()
+        }
+      })()
+
+      const [render, cancelRaf] = customRaf(function (ctx, config) {
+        ctx.clearRect(0, 0, cvs.width, cvs.height)
+        eliminate(pos, colorPos, config)
+        brickUpdate()
+        updateScore(config.score)
+        userAction()
+        nextCtx.clearRect(0, 0, cvs.width, cvs.height)
+        drawLetter(nextCtx, { ...nextBrick, x: 0, y: 0 })
+      }, config.FPS)
+
+      const isKeyPressed = (function () {
+        const isKeyPressed = {}
+        Object.keys(config.control).forEach((key) => {
+          isKeyPressed[key] = false
+        })
+        return isKeyPressed
+      })()
+
+      let lastTime = 0
+      const userAction = function () {
+        if (activeKey === null) return
+        let now = Date.now()
+        const ctrlKey = findCtrlKey(activeKey)
+        if (!isKeyPressed[ctrlKey]) {
+          lastTime = now
+          let handle = getHandle(ctrlKey)
+          handle && handle()
+          isKeyPressed[ctrlKey] = true
+          return
+        }
+        let interval = getBrickDownInterval(ctrlKey)
+        if (now - lastTime >= interval) {
+          lastTime = now - ((now - lastTime) % interval)
+          let handle = getHandle(ctrlKey)
+          handle && handle()
+        }
+      }
+
+      const findCtrlKey = (activeKey) => {
+        for (const [key, value] of Object.entries(config.control)) {
+          if (value.some((item) => item === activeKey)) {
+            return key
+          }
+        }
+      }
+
+      const getBrickDownInterval = (ctrlKey) => {
+        let interval = 1000 / config.keySpeed
+        if (config.speedUpKey.includes(ctrlKey))
+          interval = 500 / config.keySpeed
+        return interval
+      }
+
+      const getHandle = (function () {
+        const direction = {
+          left: "left",
+          right: "right",
+          down: "downOne",
+          bottom: "downBottom",
+          up: "rotate",
+        }
+        return (ctrlKey) => {
+          if (config.onceKey.includes(ctrlKey) && isKeyPressed[ctrlKey]) {
+            return null
+          }
+          return brick[direction[ctrlKey]].bind(brick)
+        }
+      })()
+
+      let activeKey = null
+      window.onkeydown = (e) => {
+        switch (e.key) {
+          case config.pause:
+            running ? cancelRaf() : render(ctx, config)
+            running = !running
+            break
+          default:
+            Object.values(config.control).forEach((item) => {
+              if (item.includes(e.key)) activeKey = e.key
+            })
+        }
+      }
+
+      let running = true
+      window.onkeyup = (e) => {
+        switch (e.key) {
+          case activeKey:
+            activeKey = null
+          default:
+            let ctrlKey
+            if ((ctrlKey = findCtrlKey(e.key))) {
+              isKeyPressed[ctrlKey] = false
+            }
+        }
+      }
+
+      render(ctx, config)
+    </script>
+  </body>
+</html>
