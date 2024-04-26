@@ -58,7 +58,11 @@ export class Brick implements BrickType {
     this.color = bricks[this.letter].color
     this.structure = bricks[this.letter].struct
     this.x = gameParam.column / 2 - 1
-    this.y = -this.structure.length
+    this.y = (() => {
+      const index = this.structure.findLastIndex((s) => +s !== 0)
+      if (index === -1) return  - this.structure.length
+      return -index - 1
+    })()
     this.lastTime = time
   }
   getBinary<T extends BrickStruct>(
@@ -149,7 +153,7 @@ export class Brick implements BrickType {
         newStructure[y][x] = this.structure[i][j]
       }
     }
-    console.log(newStructure);
+    console.log(newStructure)
     newStructure = newStructure.map((s) => s.join("")) as BrickStruct
     const newBinary = this.getBinary(newStructure, this.x)
     if (this.isOverlap(mapBinary, newBinary)) return
