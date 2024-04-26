@@ -6,67 +6,79 @@ import { eliminate, record } from "./other"
 import { $ } from "./utils"
 
 const canvas = $(".canvas.brick") as HTMLCanvasElement
-const ctx = canvas.getContext("2d")!
 const bgCanvas = $(".canvas.bg") as HTMLCanvasElement
-const bgCtx = bgCanvas.getContext("2d")!
 
 canvas.height = bgCanvas.height = window.innerHeight
 canvas.width = bgCanvas.width = window.innerWidth
 
-const mapBinary = new Array(gameParam.row).fill(0) as number[]
-const bg: BrickColor[][] = Array.from({ length: gameParam.row }, () =>
-  Array.from({ length: gameParam.column })
-)
-
 class Operate implements Operation {
-  constructor(private brick: Brick) {}
+  constructor(public mapBinary: number[], public brick: Brick) {}
   left() {
-    this.brick.left(mapBinary)
+    this.brick.left(this.mapBinary)
   }
   right() {
-    this.brick.right(mapBinary)
+    this.brick.right(this.mapBinary)
   }
   downOne() {
-    const shouldNextOne = this.brick.downOne(mapBinary)
+    const shouldNextOne = this.brick.downOne(this.mapBinary)
     if (shouldNextOne) {
       this.brick.isRecycle = true
     }
   }
   downBottom() {
-    this.brick.downBottom(mapBinary)
-    this.brick.isRecycle = true
-  }
-  rotate() {
-    this.brick.rotate(mapBinary)
-  }
-  update(time: number) {
-    const shouldNextOne = this.brick.update(time, mapBinary)
+    const shouldNextOne = this.brick.downBottom(this.mapBinary)
     if (shouldNextOne) {
       this.brick.isRecycle = true
     }
   }
-  draw(ctx: CanvasRenderingContext2D) {
-    this.brick.draw(ctx)
-  }
-  updateNext(time: number) {
-    if (!this.brick.isRecycle) return
-    record(mapBinary, bg, this.brick)
-    eliminate(mapBinary, bg)
-    drawBg(bgCtx, bg)
-    this.brick = new Brick(time)
+  rotate() {
+    this.brick.rotate(this.mapBinary)
   }
 }
 
-let operate = new Operate(new Brick())
-console.log(operate)
-
-const run = (time: number) => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-  operate.draw(ctx)
-  operate.update(time)
-  userAction(operate)
-  operate.updateNext(time)
-  requestAnimationFrame(run)
+interface GameImpl {
+  operate: Operate
+  start: (time: number) => void
+  draw: () => void
+  update: (time: number) => void
+  newNextOne: () => void
+  userAction: (operate: Operation) => void
 }
-run(0)
-console.log(mapBinary, bg)
+
+class Game implements GameImpl {
+  mapBinary = new Array(gameParam.row).fill(0) as number[]
+  bg: BrickColor[][] = Array.from({ length: gameParam.row }, () =>
+    Array.from({ length: gameParam.column })
+  )
+  operate = new Operate(this.mapBinary, new Brick())
+  ctx = canvas.getContext("2d")!
+  bgCtx = bgCanvas.getContext("2d")!
+  start(time: number = 0) {
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height)
+    this.draw()
+    this.update(time)
+    this.userAction(this.operate)
+    this.newNextOne()
+    requestAnimationFrame(this.start.bind(this))
+  }
+  draw() {
+    this.operate.brick.draw(this.ctx)
+  }
+  update(time: number) {
+    const shouldNextOne = this.operate.brick.update(time, this.mapBinary)
+    if (shouldNextOne) {
+      this.operate.brick.isRecycle = true
+    }
+  }
+  newNextOne() {
+    if (!this.operate.brick.isRecycle) return
+    record(this.mapBinary, this.bg, this.operate.brick)
+    eliminate(this.mapBinary, this.bg)
+    drawBg(this.bgCtx, this.bg)
+    this.operate.brick = new Brick(0)
+  }
+  userAction: (operate: Operation) => void = userAction
+}
+
+const game = new Game()
+game.start()

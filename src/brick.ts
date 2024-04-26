@@ -9,38 +9,23 @@ import {
 import { drawLetter } from "./draw"
 
 export interface BrickType {
-  width: number
-  height: number
-  letter: BrickLetter
-  color: BrickColor
-  structure: BinaryString<BrickStruct>
-  x: number
-  y: number
-  lastTime: number
-  isRecycle: boolean
-  getBinary<T extends BrickStruct>(
-    structure?: BinaryString<T>,
-    x?: number
-  ): number[]
   draw(ctx: CanvasRenderingContext2D): void
   update(time: number, mapBinary: number[]): boolean
   left(mapBinary: number[]): void
   right(mapBinary: number[]): void
-  downOne(mapBinary: number[]): void
-  downBottom(mapBinary: number[]): void
+  downOne(mapBinary: number[]): boolean
+  downBottom(mapBinary: number[]): boolean
   rotate(mapBinary: number[]): void
-  isOverlap(
-    mapBinary: number[],
-    binary?: number[],
-    x?: number,
-    y?: number
-  ): boolean
-  inBorder(direction: string): boolean
 }
 
 const getRandomLetter = (): BrickLetter => {
   const letters = Object.keys(bricks) as BrickLetter[]
   return letters[(Math.random() * letters.length) >> 0]
+}
+const getY = (structure: BinaryString<BrickStruct>) => {
+  const index = structure.findLastIndex((s) => +s !== 0)
+  if (index === -1) return -structure.length
+  return -index - 1
 }
 
 export class Brick implements BrickType {
@@ -58,31 +43,10 @@ export class Brick implements BrickType {
     this.color = bricks[this.letter].color
     this.structure = bricks[this.letter].struct
     this.x = gameParam.column / 2 - 1
-    this.y = (() => {
-      const index = this.structure.findLastIndex((s) => +s !== 0)
-      if (index === -1) return  - this.structure.length
-      return -index - 1
-    })()
+    this.y = getY(this.structure)
     this.lastTime = time
   }
-  getBinary<T extends BrickStruct>(
-    structure: BinaryString<T> = this.structure as BinaryString<T>,
-    x: number = this.x
-  ) {
-    const binary: number[] = []
-    const len = structure[0].length
-    for (let i = structure.length - 1; i >= 0; i--) {
-      let r
-      let carry = gameParam.column - x - len
-      if (carry >= 0) {
-        r = parseInt(structure[i], 2) << carry
-      } else {
-        r = parseInt(structure[i], 2) >> -carry
-      }
-      binary.unshift(r)
-    }
-    return binary
-  }
+
   draw(ctx: CanvasRenderingContext2D) {
     drawLetter(ctx, this)
   }
@@ -118,7 +82,7 @@ export class Brick implements BrickType {
   }
   /**
    *
-   * @param mapBinary ui二进制数据
+   * @param mapBinary 已记录方块的二进制数据
    * @returns 是否无法继续下落
    */
   downOne(mapBinary: number[]) {
@@ -132,6 +96,7 @@ export class Brick implements BrickType {
     while (!this.isOverlap(mapBinary, this.getBinary(), this.x, this.y + 1)) {
       this.y++
     }
+    return true
   }
   rotate(mapBinary: number[]) {
     const len = this.structure[0].length
@@ -154,20 +119,40 @@ export class Brick implements BrickType {
       }
     }
     console.log(newStructure)
-    newStructure = newStructure.map((s) => s.join("")) as BrickStruct
-    const newBinary = this.getBinary(newStructure, this.x)
+    newStructure = newStructure.map((s) =>
+      s.join("")
+    ) as BinaryString<BrickStruct>
+    const newBinary = this.getBinary(newStructure)
     if (this.isOverlap(mapBinary, newBinary)) return
     this.structure = newStructure
   }
+  getBinary<T extends BrickStruct>(
+    structure: BinaryString<T> = this.structure as BinaryString<T>,
+    x: number = this.x
+  ) {
+    const binary: number[] = []
+    const len = structure[0].length
+    for (let i = structure.length - 1; i >= 0; i--) {
+      let r
+      let carry = gameParam.column - x - len
+      if (carry >= 0) {
+        r = parseInt(structure[i], 2) << carry
+      } else {
+        r = parseInt(structure[i], 2) >> -carry
+      }
+      binary.unshift(r)
+    }
+    return binary
+  }
   /**
    *
-   * @param mapBinary ui二进制数据
+   * @param mapBinary 已记录方块的二进制数据
    * @param binary 方块二进制数据
    * @param x 第几行
    * @param y 第几列
    * @returns 是不是有方块重叠
    */
-  isOverlap(
+  private isOverlap(
     mapBinary: number[],
     binary = this.getBinary(),
     x: number = this.x,
@@ -189,7 +174,7 @@ export class Brick implements BrickType {
     }
     return false
   }
-  inBorder(direction: string) {
+  private inBorder(direction: string) {
     let binary = this.getBinary()
     let settle = direction == "left" ? 2 ** (gameParam.column - 1) : 1
     for (let i = binary.length - 1; i >= 0; i--) {
