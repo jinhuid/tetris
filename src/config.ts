@@ -3,7 +3,7 @@ export const gameParam = {
   row: 20,
   FPS: 165,
   speed: 2,
-  keySpeed: 8,
+  keySpeed: 10,
   score: 0,
   get brickWidth() {
     return window.innerWidth / this.column

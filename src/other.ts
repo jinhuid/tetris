@@ -9,7 +9,7 @@ export const record = (
 ) => {
   if (isGameOver(mapBinary, brick)) {
     alert("Game Over")
-    return
+    return false
   }
   const binary = brick.getBinary()
   for (let i = binary.length - 1; i >= 0; i--) {
@@ -21,6 +21,7 @@ export const record = (
       }
     }
   }
+  return true
 }
 
 // 消除行和颜色

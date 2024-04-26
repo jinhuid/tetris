@@ -2,36 +2,37 @@ const $ = (selector: string) => {
   return document.querySelector(selector)
 }
 
-const customRaf = (fn: (...args: any[]) => {}, fps: number) => {
+const customRaf = (fn: (time: number) => unknown, fps: number) => {
   if (!!fps) {
     if (!Number.isInteger(fps) || fps <= 0) {
       throw new TypeError("fps 应该是一个正整数")
     }
   }
   let timer: number
-  function raf(...args: any[]) {
+  function raf() {
     const run = (() => {
       if (fps) {
         const interval = 1000 / fps
         let lastTime = 0
-        return function (this: any, timeStamp: number) {
+        return (timeStamp: number) => {
           const deltaTime = timeStamp - lastTime
           if (deltaTime >= interval) {
-            fn.apply(this, args)
+            fn(timeStamp)
             lastTime = timeStamp - (deltaTime % interval)
           }
         }
       }
-      return function (this: any) {
-        fn.apply(this, args)
+      return (timeStamp: number) => {
+        fn(timeStamp)
       }
     })()
     const update = (timeStamp: number) => {
-      run(timeStamp)
+      // 这里的raf要放在前面
       timer = requestAnimationFrame(update)
+      run(timeStamp)
     }
     cancel()
-    update(performance.now())
+    update(0)
   }
   function cancel() {
     cancelAnimationFrame(timer)

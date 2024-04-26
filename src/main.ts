@@ -3,7 +3,7 @@ import { BrickColor, gameParam } from "./config"
 import { drawBg } from "./draw"
 import { Operation, userAction } from "./inputHandler"
 import { eliminate, record } from "./other"
-import { $ } from "./utils"
+import { $, customRaf } from "./utils"
 
 const canvas = $(".canvas.brick") as HTMLCanvasElement
 const bgCanvas = $(".canvas.bg") as HTMLCanvasElement
@@ -38,14 +38,19 @@ class Operate implements Operation {
 
 interface GameImpl {
   operate: Operate
+  gameOver: boolean
+  reStartGame: () => void
   start: (time: number) => void
   draw: () => void
   update: (time: number) => void
-  newNextOne: () => void
+  canNextOne: (time: number) => void
+  newNextOne: (time: number) => void
   userAction: (operate: Operation) => void
 }
 
+let timer = 0
 class Game implements GameImpl {
+  gameOver: boolean = false
   mapBinary = new Array(gameParam.row).fill(0) as number[]
   bg: BrickColor[][] = Array.from({ length: gameParam.row }, () =>
     Array.from({ length: gameParam.column })
@@ -53,14 +58,15 @@ class Game implements GameImpl {
   operate = new Operate(this.mapBinary, new Brick())
   ctx = canvas.getContext("2d")!
   bgCtx = bgCanvas.getContext("2d")!
-  start(time: number = 0) {
+  raf = customRaf((time) => {
     this.ctx.clearRect(0, 0, canvas.width, canvas.height)
     this.draw()
     this.update(time)
     this.userAction(this.operate)
-    this.newNextOne()
-    requestAnimationFrame(this.start.bind(this))
-  }
+    this.canNextOne(time)
+  }, 100)
+  start = this.raf[0]
+  cancel = this.raf[1]
   draw() {
     this.operate.brick.draw(this.ctx)
   }
@@ -70,15 +76,31 @@ class Game implements GameImpl {
       this.operate.brick.isRecycle = true
     }
   }
-  newNextOne() {
-    if (!this.operate.brick.isRecycle) return
-    record(this.mapBinary, this.bg, this.operate.brick)
+  canNextOne(time: number) {
+    if (this.operate.brick.isRecycle) {
+      this.newNextOne(time)
+    }
+  }
+  newNextOne(time: number) {
+    // 是否成功记录 如果失败就是游戏结束
+    this.gameOver = !record(this.mapBinary, this.bg, this.operate.brick)
+    if (this.gameOver) {
+      this.reStartGame()
+      return
+    }
     eliminate(this.mapBinary, this.bg)
     drawBg(this.bgCtx, this.bg)
-    this.operate.brick = new Brick(0)
+    this.operate.brick = new Brick(time)
+  }
+  reStartGame() {
+    this.cancel()
+    game.ctx.clearRect(0, 0, canvas.width, canvas.height)
+    game.bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height)
+    game = new Game()
+    game.start()
   }
   userAction: (operate: Operation) => void = userAction
 }
 
-const game = new Game()
+let game = new Game()
 game.start()
