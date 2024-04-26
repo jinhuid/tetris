@@ -38,7 +38,7 @@ export class Brick implements BrickType {
   isRecycle = false
   width = gameParam.brickWidth
   height = gameParam.brickHeight
-  constructor(time = 0) {
+  constructor(time = performance.now()) {
     this.letter = getRandomLetter()
     this.color = bricks[this.letter].color
     this.structure = bricks[this.letter].struct
@@ -57,9 +57,8 @@ export class Brick implements BrickType {
    */
   update(time: number, mapBinary: number[]) {
     if (time - this.lastTime >= 1000 / gameParam.speed) {
+      this.lastTime = time - ((time - this.lastTime) % (1000 / gameParam.speed))
       if (!this.isOverlap(mapBinary, this.getBinary(), this.x, this.y + 1)) {
-        this.lastTime =
-          time - ((time - this.lastTime) % (1000 / gameParam.speed))
         this.y++
         return false
       } else {
@@ -118,7 +117,6 @@ export class Brick implements BrickType {
         newStructure[y][x] = this.structure[i][j]
       }
     }
-    console.log(newStructure)
     newStructure = newStructure.map((s) =>
       s.join("")
     ) as BinaryString<BrickStruct>
