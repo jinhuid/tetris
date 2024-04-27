@@ -31,9 +31,6 @@ window.onkeydown = (e) => {
 
 window.onkeyup = (e) => {
   switch (true) {
-    // case control.pause.some((item) => item === e.key): {
-    //   break
-    // }
     case activeKey === e.key:
       activeKey = null
     default:
@@ -74,10 +71,8 @@ const getHandle = (function () {
     down: "downOne",
     bottom: "downBottom",
     up: "rotate",
-    pause: "pauseGame",
   } as const
-  return (operation: Operation, ctrlKey: Control | Pause) => {
-    if (ctrlKey === "pause") return operation.pauseGame.bind(operation)
+  return (operation: Operation, ctrlKey: Control) => {
     if (
       control.onceKey.some((item) => item === ctrlKey) &&
       isKeyPressed[ctrlKey]
@@ -99,8 +94,7 @@ export const userAction = function (pause: boolean, operation: Operation) {
   if (activeKey === null) return
   console.log(activeKey)
   if (isPauseKey(activeKey)) {
-    let handle = getHandle(operation, "pause")
-    handle?.()
+    operation.pauseGame()
     activeKey = null
     return
   }
