@@ -92,7 +92,6 @@ const isPauseKey = (
 
 export const userAction = function (pause: boolean, operation: Operation) {
   if (activeKey === null) return
-  console.log(activeKey)
   if (isPauseKey(activeKey)) {
     operation.pauseGame()
     activeKey = null

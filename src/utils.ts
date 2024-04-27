@@ -4,7 +4,7 @@ const $ = (selector: string) => {
 
 const customRaf = (
   fn: (time: number, ...args: any[]) => unknown,
-  fps: number
+  fps?: number
 ) => {
   if (!!fps) {
     if (!Number.isInteger(fps) || fps <= 0) {

@@ -17,7 +17,6 @@ const reStartGame = () => {
 }
 
 const [start] = customRaf((time: number = performance.now()) => {
-  requestAnimationFrame(start)
   game.render(time)
   checkGameOver(game)
 }, gameParam.FPS)

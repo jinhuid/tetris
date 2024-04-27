@@ -5,7 +5,7 @@ const { width, height } = container.getBoundingClientRect()
 export const gameParam = {
   column: 10,
   row: 20,
-  FPS: 165,
+  FPS: 60,
   speed: 2,
   keySpeed: 10,
   score: 0,
@@ -19,6 +19,7 @@ export const gameParam = {
     return this.windowHeight / this.row
   },
 }
+console.log(gameParam);
 
 export const bricks = {
   o: {
