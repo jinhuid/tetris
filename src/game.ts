@@ -28,16 +28,21 @@ export default class Game implements GameImpl {
   private ctx = canvas.getContext("2d")!
   private bgCtx = bgCanvas.getContext("2d")!
   private operate = new Operate(this, this.mapBinary, new Brick())
+  private lastTime = 0
+  private pauseTime = 0
   isOver: boolean = false
   pause: boolean = false
   render(time: number) {
-    console.log(this.pause)
     this.userAction()
-    if (this.pause) return
+    if (this.pause) {
+      this.cachePauseTime(time)
+      return
+    }
     this.ctx.clearRect(0, 0, canvas.width, canvas.height)
+    this.lastTime = time
     this.draw()
-    this.update(time)
-    this.canNextOne(time)
+    this.update(time - this.pauseTime)
+    this.canNextOne(time - this.pauseTime)
   }
   reSetCanvas() {
     this.ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -47,7 +52,7 @@ export default class Game implements GameImpl {
     this.operate.brick.draw(this.ctx)
   }
   private update(time: number) {
-    console.log(time)
+    // console.log(time)
     const shouldNextOne = this.operate.brick.update(time, this.mapBinary)
     if (shouldNextOne) {
       this.operate.brick.isRecycle = true
@@ -67,6 +72,10 @@ export default class Game implements GameImpl {
     eliminate(this.mapBinary, this.bg)
     drawBg(this.bgCtx, this.bg)
     this.operate.brick = new Brick(time)
+  }
+  private cachePauseTime(time: number) {
+    this.pauseTime += time - this.lastTime
+    this.lastTime = time
   }
   private userAction() {
     userAction(this.pause, this.operate)
