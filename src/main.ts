@@ -1,4 +1,6 @@
+import { gameParam } from "./config"
 import Game from "./game"
+import { customRaf } from "./utils"
 
 let game = new Game()
 
@@ -14,10 +16,10 @@ const reStartGame = () => {
   game = new Game()
 }
 
-const start = (time: number = performance.now()) => {
+const [start] = customRaf((time: number = performance.now()) => {
   requestAnimationFrame(start)
   game.render(time)
   checkGameOver(game)
-}
+}, gameParam.FPS)
 
 start()
