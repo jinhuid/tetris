@@ -59,7 +59,7 @@ function findCtrlKey(
 const getBrickDownInterval = (ctrlKey: Control) => {
   let interval = 1000 / gameParam.keySpeed
   if (control.speedUpKey.some((item) => item === ctrlKey)) {
-    interval = 500 / gameParam.keySpeed
+    interval = 1000 / control.speedUpRate / gameParam.keySpeed
   }
   return interval
 }
