@@ -1,14 +1,15 @@
-import {
-  gameParam,
-  BrickColor,
-  BrickStruct,
-  BrickLetter,
-  BinaryString,
-  bricks,
-} from "./config"
+import { gameParam, bricks } from "./config"
 import { drawLetter } from "./draw"
+import { BinaryString, BrickColor, BrickLetter, BrickStruct } from "./types"
 
-export interface BrickType {
+export interface BrickImpl {
+  color: BrickColor
+  structure: BinaryString<BrickStruct>
+  x: number
+  y: number
+  width: number
+  height: number
+  isRecycle: boolean
   draw(ctx: CanvasRenderingContext2D): void
   update(time: number, mapBinary: number[]): boolean
   left(mapBinary: number[]): void
@@ -28,16 +29,16 @@ const getY = (structure: BinaryString<BrickStruct>) => {
   return -index - 1
 }
 
-export class Brick implements BrickType {
-  letter: BrickLetter
-  color: BrickColor
-  structure: BinaryString<BrickStruct>
-  x: number
-  y: number
-  lastTime: number
-  isRecycle = false
-  width = gameParam.brickWidth
-  height = gameParam.brickHeight
+export class Brick implements BrickImpl {
+  private letter: BrickLetter
+  private lastTime: number
+  public color: BrickColor
+  public structure: BinaryString<BrickStruct>
+  public x: number
+  public y: number
+  public width = gameParam.brickWidth
+  public height = gameParam.brickHeight
+  public isRecycle = false
   constructor(time = performance.now()) {
     this.letter = getRandomLetter()
     this.color = bricks[this.letter].color

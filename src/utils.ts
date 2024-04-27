@@ -2,14 +2,17 @@ const $ = (selector: string) => {
   return document.querySelector(selector)
 }
 
-const customRaf = (fn: (time: number) => unknown, fps: number) => {
+const customRaf = (
+  fn: (time: number, ...args: any[]) => unknown,
+  fps: number
+) => {
   if (!!fps) {
     if (!Number.isInteger(fps) || fps <= 0) {
       throw new TypeError("fps 应该是一个正整数")
     }
   }
   let timer: number
-  function raf() {
+  function raf(this: any, ...args: any[]) {
     const run = (() => {
       if (fps) {
         const interval = 1000 / fps
@@ -17,13 +20,13 @@ const customRaf = (fn: (time: number) => unknown, fps: number) => {
         return (timeStamp: number) => {
           const deltaTime = timeStamp - lastTime
           if (deltaTime >= interval) {
-            fn(timeStamp)
+            fn.apply(this, [timeStamp, ...args])
             lastTime = timeStamp - (deltaTime % interval)
           }
         }
       }
       return (timeStamp: number) => {
-        fn(timeStamp)
+        fn.apply(this, [timeStamp, ...args])
       }
     })()
     const update = (timeStamp: number) => {

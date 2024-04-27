@@ -4,5 +4,8 @@
     "useDefineForClassFields": true,
     "noImplicitAny": true,
     "lib": ["esnext", "dom"],
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   }
 }

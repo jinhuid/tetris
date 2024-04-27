@@ -1,4 +1,5 @@
 import { gameParam, control } from "./config"
+import { Operation } from "./types"
 
 const isKeyPressed = {
   left: false,
@@ -8,59 +9,57 @@ const isKeyPressed = {
   bottom: false,
 }
 
-export type Operation = {
-  left: () => void
-  right: () => void
-  downOne: () => void
-  downBottom: () => void
-  rotate: () => void
-}
+type MoveKeys = (typeof control.operate)[keyof typeof control.operate][number]
+type PauseKeys = (typeof control.pause)[number]
+type Pause = "pause"
+type Control = keyof typeof control.operate
 
-type Keys = (typeof control.operate)[keyof typeof control.operate][number]
-type CtrlKey = keyof typeof control.operate
-
-let activeKey: Keys | null = null
+let activeKey: MoveKeys | PauseKeys | null = null
 window.onkeydown = (e) => {
-  switch (e.key) {
-    // case config.pause:
-    // running ? cancelRaf() : render(ctx, config)
-    // running = !running
-    // break
-    default:
-      for (const key of Object.keys(control.operate)) {
-        if (
-          control.operate[key as keyof typeof control.operate].some(
-            (item) => item === e.key
-          )
-        ) {
-          activeKey = e.key as Keys
-        }
-      }
+  switch (true) {
+    case control.pause.some((item) => item === e.key): {
+      activeKey = e.key as PauseKeys
+      break
+    }
+    case Object.values(control.operate)
+      .flat(1)
+      .some((item) => item === e.key): {
+      activeKey = e.key as MoveKeys
+    }
   }
 }
 
-let running = true
 window.onkeyup = (e) => {
-  switch (e.key) {
-    case activeKey:
+  switch (true) {
+    // case control.pause.some((item) => item === e.key): {
+    //   break
+    // }
+    case activeKey === e.key:
       activeKey = null
     default:
       let ctrlKey
-      if ((ctrlKey = findCtrlKey(e.key as Keys))) {
+      if ((ctrlKey = findCtrlKey(e.key as MoveKeys))) {
         isKeyPressed[ctrlKey] = false
       }
   }
 }
 
-const findCtrlKey = (activeKey: Keys) => {
+function findCtrlKey(activeKey: MoveKeys): Control
+function findCtrlKey(activeKey: PauseKeys): Pause
+function findCtrlKey(
+  activeKey: MoveKeys | PauseKeys
+): Control | Pause | undefined {
+  if (control.pause.some((item) => item === activeKey)) {
+    return "pause" as Pause
+  }
   for (const [key, value] of Object.entries(control.operate)) {
     if (value.some((item) => item === activeKey)) {
-      return key as CtrlKey
+      return key as Control
     }
   }
 }
 
-const getBrickDownInterval = (ctrlKey: CtrlKey) => {
+const getBrickDownInterval = (ctrlKey: Control) => {
   let interval = 1000 / gameParam.keySpeed
   if (control.speedUpKey.some((item) => item === ctrlKey)) {
     interval = 500 / gameParam.keySpeed
@@ -75,22 +74,37 @@ const getHandle = (function () {
     down: "downOne",
     bottom: "downBottom",
     up: "rotate",
+    pause: "pauseGame",
   } as const
-  return (operation: Operation, ctrlKey: CtrlKey) => {
+  return (operation: Operation, ctrlKey: Control | Pause) => {
+    if (ctrlKey === "pause") return operation.pauseGame.bind(operation)
     if (
       control.onceKey.some((item) => item === ctrlKey) &&
       isKeyPressed[ctrlKey]
     )
       return null
-    return operation[direction[ctrlKey]].bind(
-      operation
-    ) as Operation[keyof Operation]
+    return operation[direction[ctrlKey]].bind(operation)
   }
 })()
 
 let lastTime = 0
-export const userAction = function (operation: Operation) {
+
+const isPauseKey = (
+  activeKey: MoveKeys | PauseKeys
+): activeKey is PauseKeys => {
+  return control.pause.some((item) => item === activeKey)
+}
+
+export const userAction = function (pause: boolean, operation: Operation) {
   if (activeKey === null) return
+  console.log(activeKey)
+  if (isPauseKey(activeKey)) {
+    let handle = getHandle(operation, "pause")
+    handle?.()
+    activeKey = null
+    return
+  }
+  if (pause) return
   let now = Date.now()
   const ctrlKey = findCtrlKey(activeKey)!
   if (!isKeyPressed[ctrlKey]) {

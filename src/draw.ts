@@ -1,5 +1,6 @@
 import { Brick } from "./brick"
-import { BrickColor, gameParam } from "./config"
+import { gameParam } from "./config"
+import { BrickColor } from "./types"
 
 export const drawBrick = (
   ctx: CanvasRenderingContext2D,
