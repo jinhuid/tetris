@@ -1,5 +1,7 @@
 import { Binary } from "./types"
-
+import { $ } from "./utils"
+const container = $("#container") as HTMLDivElement
+const { width, height } = container.getBoundingClientRect()
 export const gameParam = {
   column: 10,
   row: 20,
@@ -7,11 +9,14 @@ export const gameParam = {
   speed: 2,
   keySpeed: 10,
   score: 0,
+  devicePixelRatio: window.devicePixelRatio,
+  windowWidth: width * devicePixelRatio,
+  windowHeight: height * devicePixelRatio,
   get brickWidth() {
-    return window.innerWidth / this.column
+    return this.windowWidth / this.column
   },
   get brickHeight() {
-    return window.innerHeight / this.row
+    return this.windowHeight / this.row
   },
 }
 
@@ -56,7 +61,5 @@ export const control = {
   },
   onceKey: ["up", "bottom"],
   speedUpKey: ["down"],
-  pause: ["Enter","p"],
+  pause: ["Enter", "p"],
 } as const
-
-

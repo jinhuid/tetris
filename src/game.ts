@@ -10,8 +10,8 @@ import { $ } from "./utils"
 const canvas = $(".canvas.brick") as HTMLCanvasElement
 const bgCanvas = $(".canvas.bg") as HTMLCanvasElement
 
-canvas.height = bgCanvas.height = window.innerHeight
-canvas.width = bgCanvas.width = window.innerWidth
+canvas.height = bgCanvas.height = gameParam.windowHeight 
+canvas.width = bgCanvas.width = gameParam.windowWidth 
 
 interface GameImpl {
   isOver: boolean

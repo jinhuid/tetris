@@ -6,8 +6,8 @@ export const drawBrick = (
   ctx: CanvasRenderingContext2D,
   { x, y, width, height, color }: Brick
 ) => {
-  var radius = 8 // 圆角半径
-  var borderWidth = 5 // 边框宽度
+  var radius = 8 * gameParam.devicePixelRatio // 圆角半径
+  var borderWidth = 4 * gameParam.devicePixelRatio // 边框宽度
 
   ctx.fillStyle = color // 设置填充颜色
   ctx.beginPath() // 开始路径

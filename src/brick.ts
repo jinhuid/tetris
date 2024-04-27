@@ -36,8 +36,8 @@ export class Brick implements BrickImpl {
   public structure: BinaryString<BrickStruct>
   public x: number
   public y: number
-  public width = gameParam.brickWidth
-  public height = gameParam.brickHeight
+  public width = gameParam.brickWidth 
+  public height = gameParam.brickHeight 
   public isRecycle = false
   constructor(time = performance.now()) {
     this.letter = getRandomLetter()

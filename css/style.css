@@ -1,38 +1,24 @@
 * {
   margin: 0px;
   padding: 0px;
-  overflow: hidden;
 }
 .canvas {
   position: absolute;
   top: 0;
   left: 0;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 }
-.bg{
+.bg {
   z-index: -1;
   background-color: rgb(226, 233, 175);
 }
-/* .brick,
-.next {
-  background-color: transparent;
-}
-.next {
-  opacity: 0.3;
-}
-.pos {
-  background-color: rgb(226, 233, 175);
-} */
-/* #box {
+
+#container {
   position: relative;
-  height: 100vh;
+  height: 80vh;
   background-size: 100% 100%;
-  background-color: rgb(25, 24, 25);
-} */
-/* @media screen and (orientation: landscape) {
-  #box {
-    aspect-ratio: 9 / 18;
-    margin: auto;
-  }
-} */
+  aspect-ratio: 9 / 18;
+  margin: auto;
+}
+
