@@ -1,8 +1,8 @@
 import { Brick } from "./brick"
 import Game from "./game"
-import { Operation } from "./types"
+import { OperateImpl } from "./types"
 
-export default class Operate implements Operation {
+export default class Operate implements OperateImpl {
   constructor(
     private game: Game,
     private mapBinary: number[],

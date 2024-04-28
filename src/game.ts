@@ -3,7 +3,7 @@ import { gameParam } from "./config"
 import { drawBg } from "./draw"
 import { userAction } from "./inputHandler"
 import Operate from "./operate"
-import { eliminate, record } from "./other"
+import { eliminate, record } from "./helper"
 import { BrickColor } from "./types"
 import { $ } from "./utils"
 

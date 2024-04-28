@@ -19,36 +19,50 @@ export const gameParam = {
     return this.windowHeight / this.row
   },
 }
-console.log(gameParam);
 
+// prettier-ignore
 export const bricks = {
   o: {
     color: "#FADADD" as const,
-    struct: ["11", "11"] as Binary<2>[],
+    struct: ["11",
+             "11"] as Binary<2>[],
   },
   i: {
     color: "#F7E9D4" as const,
-    struct: ["0000", "1111", "0000", "0000"] as Binary<4>[],
+    struct: ["0000",
+             "1111",
+             "0000",
+             "0000"] as Binary<4>[],
   },
   s: {
     color: "#C8E6C9" as const,
-    struct: ["011", "110", "000"] as Binary<3>[],
+    struct: ["011",
+             "110",
+             "000"] as Binary<3>[],
   },
   z: {
     color: "#B3E5FC" as const,
-    struct: ["110", "011", "000"] as Binary<3>[],
+    struct: ["110", 
+             "011", 
+             "000"] as Binary<3>[],
   },
   l: {
     color: "#FFCC80" as const,
-    struct: ["001", "111", "000"] as Binary<3>[],
+    struct: ["001", 
+             "111",
+             "000"] as Binary<3>[],
   },
   j: {
     color: "#FFEE58" as const,
-    struct: ["100", "111", "000"] as Binary<3>[],
+    struct: ["100",
+             "111",
+             "000"] as Binary<3>[],
   },
   t: {
     color: "#CE93D8" as const,
-    struct: ["000", "111", "010"] as Binary<3>[],
+    struct: ["000",
+             "111",
+             "010"] as Binary<3>[],
   },
 }
 
