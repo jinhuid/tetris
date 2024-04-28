@@ -1,5 +1,5 @@
 import { gameParam, control } from "./config"
-import { Operation } from "./types"
+import { OperateImpl } from "./types"
 
 const isKeyPressed = {
   left: false,
@@ -72,7 +72,7 @@ const getHandle = (function () {
     bottom: "downBottom",
     up: "rotate",
   } as const
-  return (operation: Operation, ctrlKey: Control) => {
+  return (operation: OperateImpl, ctrlKey: Control) => {
     if (
       control.onceKey.some((item) => item === ctrlKey) &&
       isKeyPressed[ctrlKey]
@@ -90,7 +90,7 @@ const isPauseKey = (
   return control.pause.some((item) => item === activeKey)
 }
 
-export const userAction = function (pause: boolean, operation: Operation) {
+export const userAction = function (pause: boolean, operation: OperateImpl) {
   if (activeKey === null) return
   if (isPauseKey(activeKey)) {
     operation.pauseGame()
