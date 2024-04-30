@@ -111,6 +111,6 @@ export const userAction = function (pause: boolean, operation: OperateImpl) {
   if (now - lastTime >= interval) {
     lastTime = now - ((now - lastTime) % interval)
     let handle = getHandle(operation, ctrlKey)
-    handle && handle()
+    handle?.()
   }
 }

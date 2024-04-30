@@ -2,7 +2,10 @@ import { Brick } from "./brick"
 import { gameParam } from "./config"
 import { BrickColor } from "./types"
 
-// 记录方块在地图上的位置
+/**
+ * 记录方块在地图上的位置
+ * @returns 是否记录成功
+ */
 export const record = (
   mapBinary: number[],
   bg: BrickColor[][],
@@ -25,7 +28,9 @@ export const record = (
   return true
 }
 
-// 消除行和颜色
+/**
+ * 消除行和颜色
+ */
 export const eliminate = (mapBinary: number[], bg: BrickColor[][]) => {
   let count = 0
   for (let i = gameParam.row - 1; i >= 0; i--) {
