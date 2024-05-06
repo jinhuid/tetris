@@ -1,4 +1,4 @@
-import { Binary, Bricks } from "./types"
+import {  Bricks } from "./types"
 import { $ } from "./utils"
 const container = $("#container") as HTMLDivElement
 const { width, height } = container.getBoundingClientRect()
