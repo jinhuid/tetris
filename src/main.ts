@@ -11,9 +11,9 @@ const checkGameOver = (game: Game) => {
   }
 }
 
-const reStartGame = (game: Game) => {
-  game.clearBrick()
-  game.clearBg()
+const reStartGame = (currentGame: Game) => {
+  currentGame.clearBrick()
+  currentGame.clearBg()
   game = new Game()
 }
 

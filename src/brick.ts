@@ -123,9 +123,9 @@ export class Brick implements IBrick {
   ) {
     const binary: number[] = []
     const len = structure[0].length
-    for (let i = structure.length - 1; i >= 0; i--) {
+    const carry = gameParam.column - x - len
+    for (let i = len - 1; i >= 0; i--) {
       let r
-      let carry = gameParam.column - x - len
       if (carry >= 0) {
         r = parseInt(structure[i], 2) << carry
       } else {
