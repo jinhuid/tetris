@@ -7,7 +7,7 @@ type NoneBinary<T extends string, _T = T> = T extends `${"1" | "0"}${infer R}`
 
 type isBinaryString<T extends string> = NoneBinary<T> extends never ? never : T
 
-export type OperateImpl = {
+export type OperateEvents = {
   left: () => void
   right: () => void
   downOne: () => void

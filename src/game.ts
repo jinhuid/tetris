@@ -1,7 +1,7 @@
 import { Brick } from "./brick"
 import { gameParam } from "./config"
 import { drawBg } from "./draw"
-import { userAction } from "./inputHandler"
+import { userActions } from "./inputHandler"
 import Operate from "./operate"
 import { eliminate, record } from "./helper"
 import { BrickColor } from "./types"
@@ -10,17 +10,18 @@ import { $ } from "./utils"
 const canvas = $(".canvas.brick") as HTMLCanvasElement
 const bgCanvas = $(".canvas.bg") as HTMLCanvasElement
 
-canvas.height = bgCanvas.height = gameParam.windowHeight 
-canvas.width = bgCanvas.width = gameParam.windowWidth 
+canvas.height = bgCanvas.height = gameParam.windowHeight
+canvas.width = bgCanvas.width = gameParam.windowWidth
 
-interface GameImpl {
+interface IGame {
   isOver: boolean
-  pause: boolean
+  isPause: boolean
   render: (time: number) => void
-  reSetCanvas: () => void
+  clearBrick: () => void
+  clearBg: () => void
 }
 
-export default class Game implements GameImpl {
+export default class Game implements IGame {
   private mapBinary = new Array(gameParam.row).fill(0) as number[]
   private bg: BrickColor[][] = Array.from({ length: gameParam.row }, () =>
     Array.from({ length: gameParam.column })
@@ -31,22 +32,27 @@ export default class Game implements GameImpl {
   private lastTime = 0
   private pauseTime = 0
   isOver: boolean = false
-  pause: boolean = false
+  isPause: boolean = false
   render(time: number) {
-    this.userAction()
-    if (this.pause) {
+    this.userActions()
+    if (this.isPause) {
       this.cachePauseTime(time)
       return
     }
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height)
+    this.clearBrick()
     this.lastTime = time
     this.draw()
     this.update(time - this.pauseTime)
     this.canNextOne(time - this.pauseTime)
   }
-  reSetCanvas() {
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height)
-    this.bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height)
+  clearBrick() {
+    this.clearCanvas(this.ctx)
+  }
+  clearBg() {
+    this.clearCanvas(this.bgCtx)
+  }
+  private clearCanvas(ctx: CanvasRenderingContext2D) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
   private draw() {
     this.operate.brick.draw(this.ctx)
@@ -77,7 +83,7 @@ export default class Game implements GameImpl {
     this.pauseTime += time - this.lastTime
     this.lastTime = time
   }
-  private userAction() {
-    userAction(this.pause, this.operate)
+  private userActions() {
+    userActions(this.isPause, this.operate)
   }
 }

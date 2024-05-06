@@ -1,8 +1,8 @@
 import { Brick } from "./brick"
 import Game from "./game"
-import { OperateImpl } from "./types"
+import { OperateEvents } from "./types"
 
-export default class Operate implements OperateImpl {
+export default class Operate implements OperateEvents {
   constructor(
     private game: Game,
     private mapBinary: number[],
@@ -30,6 +30,6 @@ export default class Operate implements OperateImpl {
     this.brick.rotate(this.mapBinary)
   }
   pauseGame() {
-    this.game.pause = !this.game.pause
+    this.game.isPause = !this.game.isPause
   }
 }

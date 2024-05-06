@@ -7,12 +7,13 @@ let game = new Game()
 const checkGameOver = (game: Game) => {
   if (game.isOver) {
     alert("Game Over")
-    reStartGame()
+    reStartGame(game)
   }
 }
 
-const reStartGame = () => {
-  game.reSetCanvas()
+const reStartGame = (game: Game) => {
+  game.clearBrick()
+  game.clearBg()
   game = new Game()
 }
 
