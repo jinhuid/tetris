@@ -20,6 +20,8 @@ export type BinaryString<T extends BrickStruct> = {
   readonly [K in keyof T]: isBinaryString<T[K]>
 }
 
+// type a = BinaryString<["11", "11"] | ["111", "101", "001"]>
+
 export type Binary<
   T extends number,
   R extends string = "",

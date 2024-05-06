@@ -2,7 +2,8 @@ import { gameParam, bricks } from "./config"
 import { drawLetter } from "./draw"
 import { BinaryString, BrickColor, BrickLetter, BrickStruct } from "./types"
 
-export interface BrickImpl {
+export interface IBrick {
+  letter: BrickLetter
   color: BrickColor
   structure: BinaryString<BrickStruct>
   x: number
@@ -29,25 +30,16 @@ const getY = (structure: BinaryString<BrickStruct>) => {
   return -index - 1
 }
 
-export class Brick implements BrickImpl {
-  private letter: BrickLetter
-  private lastTime: number
-  public color: BrickColor
-  public structure: BinaryString<BrickStruct>
-  public x: number
-  public y: number
-  public width = gameParam.brickWidth 
-  public height = gameParam.brickHeight 
-  public isRecycle = false
-  constructor(time = performance.now()) {
-    this.letter = getRandomLetter()
-    this.color = bricks[this.letter].color
-    this.structure = bricks[this.letter].struct
-    this.x = gameParam.column / 2 - 1
-    this.y = getY(this.structure)
-    this.lastTime = time
-  }
-
+export class Brick implements IBrick {
+  letter = getRandomLetter()
+  color = bricks[this.letter].color
+  structure: BinaryString<BrickStruct> = bricks[this.letter].struct
+  x = gameParam.column / 2 - 1
+  y = getY(this.structure)
+  width = gameParam.brickWidth
+  height = gameParam.brickHeight
+  isRecycle = false
+  constructor(public lastTime: number = performance.now()) {}
   draw(ctx: CanvasRenderingContext2D) {
     drawLetter(ctx, this)
   }
@@ -125,7 +117,7 @@ export class Brick implements BrickImpl {
     if (this.isOverlap(mapBinary, newBinary)) return
     this.structure = newStructure
   }
-  getBinary<T extends BrickStruct>(
+  private getBinary<T extends BrickStruct>(
     structure: BinaryString<T> = this.structure as BinaryString<T>,
     x: number = this.x
   ) {
