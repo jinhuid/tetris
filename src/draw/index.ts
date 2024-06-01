@@ -1,11 +1,10 @@
-import { Brick } from "../brick"
 import { gameParam } from "../gameConfig"
-import { BrickColor } from "../types"
+import { DrawBrick, BrickColor } from "../types"
 import { drawBrickPiece } from "./drawBrickPiece"
 
 export const drawBrick = (
   ctx: CanvasRenderingContext2D,
-  { x, y, width, height, color, structure }: Brick
+{ x, y, width, height, color, structure }:DrawBrick
 ) => {
   for (let i = 0; i < structure.length; i++) {
     for (let j = 0; j < structure[i].length; j++) {
@@ -16,7 +15,7 @@ export const drawBrick = (
         width,
         height,
         color,
-      } as Brick)
+      } as DrawBrick)
     }
   }
 }
@@ -37,7 +36,7 @@ export const drawBg = function (
         width: brickWidth,
         height: brickHeight,
         color: colors[i][j],
-      } as Brick)
+      } as DrawBrick)
     }
   }
 }

@@ -1,5 +1,28 @@
 import { isBinaryString } from "./helper"
 
+export type BinaryString<T extends BrickStruct> = {
+  [K in keyof T]: isBinaryString<T[K]>
+}
+
+// type a = BinaryString<("00" | "10" | "01" | "11")[]>
+
+export type Binary<
+  T extends number,
+  R extends string = "",
+  Arr extends string[] = []
+> = Arr["length"] extends T ? R : Binary<T, `${R}${"0" | "1"}`, [...Arr, ""]>
+
+export type Struct<
+  T extends number,
+  R extends any[] = []
+> = R["length"] extends T ? R : Struct<T, [...R, Binary<T>]>
+
+export type BrickLetter = keyof Bricks
+
+export type BrickColor = Bricks[BrickLetter]["color"]
+
+export type BrickStruct = Bricks[BrickLetter]["struct"]
+
 export type GameParam = {
   readonly windowWidth: number
   readonly windowHeight: number
@@ -58,17 +81,20 @@ export type Bricks = {
   }
 }
 
-export interface IBrick {
-  letter: BrickLetter
-  color: BrickColor
-  structure: BinaryString<BrickStruct>
+export type DrawBrick = {
   x: number
   y: number
   width: number
   height: number
+  color: BrickColor
+  structure: BinaryString<BrickStruct>
+}
+
+export interface IBrick {
   isRecycle: boolean
   draw(ctx: CanvasRenderingContext2D): void
   update(time: number, mapBinary: number[]): boolean
+  getBinary(): number[]
   left(mapBinary: number[]): void
   right(mapBinary: number[]): void
   downOne(mapBinary: number[]): boolean
@@ -76,33 +102,29 @@ export interface IBrick {
   rotate(mapBinary: number[]): void
 }
 
-export interface IGame {
-  isOver: boolean
-  isPause: boolean
+export interface ICanvasWithMapCtx {
+  ctx: CanvasRenderingContext2D
+  bgCtx: CanvasRenderingContext2D
+  cleanUpCanvas: () => void
+  mapBinary: number[]
+  bg: BrickColor[][]
+}
+
+export interface PlayWithPause {
+  playGame: () => void
+  pauseGame: () => void
+}
+
+export interface IRenderer extends PlayWithPause {
+  over: boolean
+  pause: boolean
   render: (time: number) => void
-  clearBrick: () => void
-  clearBg: () => void
 }
 
-export type BinaryString<T extends BrickStruct> = {
-  readonly [K in keyof T]: isBinaryString<T[K]>
+export interface IGame extends PlayWithPause {
+  over: boolean
+  pause: boolean
+  startGame: () => void
+  restartGame: () => void
+  cancelGame: () => void
 }
-
-// type a = BinaryString<("00" | "10" | "01" | "11")[]>
-
-export type Binary<
-  T extends number,
-  R extends string = "",
-  Arr extends string[] = []
-> = Arr["length"] extends T ? R : Binary<T, `${R}${"0" | "1"}`, [...Arr, ""]>
-
-export type Struct<
-  T extends number,
-  R extends any[] = []
-> = R["length"] extends T ? R : Struct<T, [...R, Binary<T>]>
-
-export type BrickLetter = keyof Bricks
-
-export type BrickColor = Bricks[BrickLetter]["color"]
-
-export type BrickStruct = Bricks[BrickLetter]["struct"]

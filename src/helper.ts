@@ -1,6 +1,5 @@
-import { Brick } from "./brick"
 import { gameParam } from "./gameConfig"
-import { BrickColor } from "./types"
+import { BrickColor, IBrick } from "./types"
 
 /**
  * 记录方块在地图上的位置
@@ -9,7 +8,7 @@ import { BrickColor } from "./types"
 export const record = (
   mapBinary: number[],
   bg: BrickColor[][],
-  brick: Brick
+  brick: IBrick
 ) => {
   // 记录失败返回会false
   if (isGameOver(brick)) {
@@ -47,7 +46,7 @@ export const eliminate = (mapBinary: number[], bg: BrickColor[][]) => {
 }
 
 // 游戏是否结束
-const isGameOver = (brick: Brick) => {
+const isGameOver = (brick: IBrick) => {
   // 这里只需要判断方块是否超出顶部即可 判断方块的每一行下标是不是越界(及y小于0)
   const len = brick.structure.length
   for (let i = 0; i < len; i++) {

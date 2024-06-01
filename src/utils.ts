@@ -40,7 +40,7 @@ const customRaf = (
   function cancel() {
     cancelAnimationFrame(timer)
   }
-  return [raf, cancel]
+  return [raf, cancel] as const
 }
 
 function throttle(fn: (...args: any[]) => {}, delay: number) {

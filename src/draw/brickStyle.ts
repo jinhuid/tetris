@@ -1,9 +1,9 @@
-import { Brick } from "../brick"
 import { gameParam } from "../gameConfig"
+import { DrawBrick } from "../types"
 
 export const drawStyle = (
   ctx: CanvasRenderingContext2D,
-  { x, y, width, height, color }: Brick
+  { x, y, width, height, color }: DrawBrick
 ) => {
   const radius = height / 10/**弧度比例 */ * gameParam.devicePixelRatio // 圆角半径
   const borderWidth = height / 25/**边框比例 */ * gameParam.devicePixelRatio // 边框宽度

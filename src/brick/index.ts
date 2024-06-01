@@ -14,17 +14,24 @@ const getY = (structure: BinaryString<BrickStruct>) => {
 }
 
 export class Brick implements IBrick {
-  letter = getRandomLetter()
-  color = bricks[this.letter].color
-  structure: BinaryString<BrickStruct> = bricks[this.letter].struct
-  x = gameParam.column / 2 - 1
-  y = getY(this.structure)
-  width = gameParam.brickWidth
-  height = gameParam.brickHeight
+  private readonly letter = getRandomLetter()
+  private readonly color = bricks[this.letter].color
+  private readonly width = gameParam.brickWidth
+  private readonly height = gameParam.brickHeight
+  private structure: BinaryString<BrickStruct> = bricks[this.letter].struct
+  private x = gameParam.column / 2 - 1
+  private y = getY(this.structure)
   isRecycle = false
-  constructor(public lastTime: number = performance.now()) {}
+  constructor(private lastTime: number = performance.now()) {}
   draw(ctx: CanvasRenderingContext2D) {
-    drawBrick(ctx, this)
+    drawBrick(ctx, {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
+      color: this.color,
+      structure: this.structure,
+    })
   }
   /**
    * @param time 每帧调用时间戳
@@ -95,13 +102,13 @@ export class Brick implements IBrick {
     }
     newStructure = newStructure.map((s) =>
       s.join("")
-    ) as unknown as BinaryString<BrickStruct>
+    ) as BinaryString<BrickStruct>
     const newBinary = this.getBinary(newStructure)
     if (this.isOverlap(mapBinary, newBinary)) return
     this.structure = newStructure
   }
-  getBinary<T extends BrickStruct>(
-    structure: BinaryString<T> = this.structure as BinaryString<T>,
+  getBinary(
+    structure: BinaryString<BrickStruct> = this.structure,
     x: number = this.x
   ) {
     const binary: number[] = []
