@@ -89,67 +89,58 @@ const { width, height } = container.getBoundingClientRect();
 const gameParam = {
   column: 10,
   row: 20,
-  FPS: 60,
+  FPS: 165,
   speed: 2,
-  keySpeed: 10,
+  keySpeed: 8,
   score: 0,
   devicePixelRatio: window.devicePixelRatio,
-  windowWidth: width * devicePixelRatio,
-  windowHeight: height * devicePixelRatio,
+  // 给方块计算出整数值宽高，不然小数情况可能会出现方块间的间隙
   get brickWidth() {
-    return this.windowWidth / this.column;
+    return Math.round(width * this.devicePixelRatio / this.column);
   },
   get brickHeight() {
-    return this.windowHeight / this.row;
+    return Math.round(height * this.devicePixelRatio / this.row);
+  },
+  // 以方块的整数值加上行列算出整个画布的宽高
+  get windowWidth() {
+    return this.brickWidth * this.column;
+  },
+  get windowHeight() {
+    return this.brickHeight * this.row;
   }
 };
-console.log(gameParam);
-const bricks = {
-  o: {
-    color: "#FADADD",
-    struct: ["11", "11"]
-  },
-  i: {
-    color: "#F7E9D4",
-    struct: ["0000", "1111", "0000", "0000"]
-  },
-  s: {
-    color: "#C8E6C9",
-    struct: ["011", "110", "000"]
-  },
-  z: {
-    color: "#B3E5FC",
-    struct: ["110", "011", "000"]
-  },
-  l: {
-    color: "#FFCC80",
-    struct: ["001", "111", "000"]
-  },
-  j: {
-    color: "#FFEE58",
-    struct: ["100", "111", "000"]
-  },
-  t: {
-    color: "#CE93D8",
-    struct: ["000", "111", "010"]
+const canvas = $(".canvas.brick");
+const bgCanvas = $(".canvas.bg");
+canvas.height = bgCanvas.height = gameParam.windowHeight;
+canvas.width = bgCanvas.width = gameParam.windowWidth;
+const _CanvasWithMapCtx = class _CanvasWithMapCtx {
+  constructor() {
+    __publicField(this, "ctx");
+    __publicField(this, "bgCtx");
+    __publicField(this, "mapBinary");
+    __publicField(this, "bg");
+    this.ctx = _CanvasWithMapCtx.ctx;
+    this.bgCtx = _CanvasWithMapCtx.bgCtx;
+    this.mapBinary = new Array(gameParam.row).fill(0);
+    this.bg = Array.from(
+      { length: gameParam.row },
+      () => Array.from({ length: gameParam.column })
+    );
+  }
+  cleanUpCanvas() {
+    this.clearCanvas(this.ctx);
+    this.clearCanvas(this.bgCtx);
+  }
+  clearCanvas(ctx) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
 };
-const control = {
-  operate: {
-    left: ["a", "ArrowLeft"],
-    right: ["d", "ArrowRight"],
-    up: ["w", "ArrowUp"],
-    down: ["s", "ArrowDown"],
-    bottom: [" "]
-  },
-  onceKey: ["up", "bottom"],
-  speedUpKey: ["down"],
-  speedUpRate: 2,
-  pause: ["Enter", "p"]
-};
-const drawBrick = (ctx, { x, y, width: width2, height: height2, color }) => {
-  var radius = 8 * gameParam.devicePixelRatio;
-  var borderWidth = 4 * gameParam.devicePixelRatio;
+__publicField(_CanvasWithMapCtx, "ctx", canvas.getContext("2d"));
+__publicField(_CanvasWithMapCtx, "bgCtx", bgCanvas.getContext("2d"));
+let CanvasWithMapCtx = _CanvasWithMapCtx;
+const drawStyle = (ctx, { x, y, width: width2, height: height2, color }) => {
+  const radius = height2 / 10 * gameParam.devicePixelRatio;
+  const borderWidth = height2 / 25 * gameParam.devicePixelRatio;
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -162,27 +153,93 @@ const drawBrick = (ctx, { x, y, width: width2, height: height2, color }) => {
   ctx.lineTo(x, y + radius);
   ctx.arcTo(x, y, x + radius, y, radius);
   ctx.fill();
+  const borderX = x + borderWidth / 2;
+  const borderY = y + borderWidth / 2;
+  const borderWidthAdjusted = width2 - borderWidth;
+  const borderHeightAdjusted = height2 - borderWidth;
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = borderWidth;
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width2 - radius, y);
-  ctx.arcTo(x + width2, y, x + width2, y + radius, radius);
-  ctx.lineTo(x + width2, y + height2 - radius);
-  ctx.arcTo(x + width2, y + height2, x + width2 - radius, y + height2, radius);
-  ctx.lineTo(x + radius, y + height2);
-  ctx.arcTo(x, y + height2, x, y + height2 - radius, radius);
-  ctx.lineTo(x, y + radius);
-  ctx.arcTo(x, y, x + radius, y, radius);
+  ctx.moveTo(borderX + radius, borderY);
+  ctx.lineTo(borderX + borderWidthAdjusted - radius, borderY);
+  ctx.arcTo(
+    borderX + borderWidthAdjusted,
+    borderY,
+    borderX + borderWidthAdjusted,
+    borderY + radius,
+    radius
+  );
+  ctx.lineTo(
+    borderX + borderWidthAdjusted,
+    borderY + borderHeightAdjusted - radius
+  );
+  ctx.arcTo(
+    borderX + borderWidthAdjusted,
+    borderY + borderHeightAdjusted,
+    borderX + borderWidthAdjusted - radius,
+    borderY + borderHeightAdjusted,
+    radius
+  );
+  ctx.lineTo(borderX + radius, borderY + borderHeightAdjusted);
+  ctx.arcTo(
+    borderX,
+    borderY + borderHeightAdjusted,
+    borderX,
+    borderY + borderHeightAdjusted - radius,
+    radius
+  );
+  ctx.lineTo(borderX, borderY + radius);
+  ctx.arcTo(borderX, borderY, borderX + radius, borderY, radius);
   ctx.stroke();
   ctx.closePath();
 };
-const drawLetter = (ctx, { x, y, width: width2, height: height2, color, structure }) => {
+const offsetCanvas = document.createElement("canvas");
+const offsetCtx = offsetCanvas.getContext("2d");
+offsetCanvas.height = gameParam.brickHeight * 20;
+offsetCanvas.width = gameParam.brickWidth;
+let index = 0;
+const cache = {};
+const drawBrickPiece = (ctx, { x, y, width: width2, height: height2, color }) => {
+  if (color in cache) {
+    ctx.drawImage(
+      offsetCanvas,
+      0,
+      height2 * cache[color],
+      width2,
+      height2,
+      x,
+      y,
+      width2,
+      height2
+    );
+    return;
+  }
+  drawStyle(offsetCtx, {
+    x: 0,
+    y: index * height2,
+    width: width2,
+    height: height2,
+    color
+  });
+  cache[color] = index++;
+  ctx.drawImage(
+    offsetCanvas,
+    0,
+    height2 * cache[color],
+    width2,
+    height2,
+    x,
+    y,
+    width2,
+    height2
+  );
+};
+const drawBrick = (ctx, { x, y, width: width2, height: height2, color, structure }) => {
   for (let i = 0; i < structure.length; i++) {
     for (let j = 0; j < structure[i].length; j++) {
       if (structure[i][j] == "0")
         continue;
-      drawBrick(ctx, {
+      drawBrickPiece(ctx, {
         x: (x + j) * width2,
         y: (y + i) * height2,
         width: width2,
@@ -198,7 +255,7 @@ const drawBg = function(ctx, colors, brickWidth = gameParam.brickWidth, brickHei
     for (let j = 0; j < colors[i].length; j++) {
       if (colors[i][j] === void 0)
         continue;
-      drawBrick(ctx, {
+      drawBrickPiece(ctx, {
         x: j * brickWidth,
         y: i * brickHeight,
         width: brickWidth,
@@ -208,36 +265,92 @@ const drawBg = function(ctx, colors, brickWidth = gameParam.brickWidth, brickHei
     }
   }
 };
+const bricks = {
+  o: {
+    color: "#FADADD",
+    struct: [
+      "11",
+      "11"
+    ]
+  },
+  i: {
+    color: "#F7E9D4",
+    struct: [
+      "0000",
+      "1111",
+      "0000",
+      "0000"
+    ]
+  },
+  s: {
+    color: "#C8E6C9",
+    struct: [
+      "011",
+      "110",
+      "000"
+    ]
+  },
+  z: {
+    color: "#B3E5FC",
+    struct: [
+      "110",
+      "011",
+      "000"
+    ]
+  },
+  l: {
+    color: "#FFCC80",
+    struct: [
+      "001",
+      "111",
+      "000"
+    ]
+  },
+  j: {
+    color: "#FFEE58",
+    struct: [
+      "100",
+      "111",
+      "000"
+    ]
+  },
+  t: {
+    color: "#CE93D8",
+    struct: [
+      "000",
+      "111",
+      "010"
+    ]
+  },
+  ".": {
+    color: "green",
+    struct: ["1"]
+  }
+};
 const getRandomLetter = () => {
   const letters = Object.keys(bricks);
   return letters[Math.random() * letters.length >> 0];
 };
 const getY = (structure) => {
-  const index = structure.findLastIndex((s) => +s !== 0);
-  if (index === -1)
+  const index2 = structure.findLastIndex((s) => +s !== 0);
+  if (index2 === -1)
     return -structure.length;
-  return -index - 1;
+  return -index2 - 1;
 };
 class Brick {
-  constructor(time = performance.now()) {
-    __publicField(this, "letter");
-    __publicField(this, "lastTime");
-    __publicField(this, "color");
-    __publicField(this, "structure");
-    __publicField(this, "x");
-    __publicField(this, "y");
+  constructor(lastTime2 = performance.now()) {
+    __publicField(this, "letter", getRandomLetter());
+    __publicField(this, "color", bricks[this.letter].color);
     __publicField(this, "width", gameParam.brickWidth);
     __publicField(this, "height", gameParam.brickHeight);
+    __publicField(this, "structure", bricks[this.letter].struct);
+    __publicField(this, "x", gameParam.column / 2 - 1);
+    __publicField(this, "y", getY(this.structure));
     __publicField(this, "isRecycle", false);
-    this.letter = getRandomLetter();
-    this.color = bricks[this.letter].color;
-    this.structure = bricks[this.letter].struct;
-    this.x = gameParam.column / 2 - 1;
-    this.y = getY(this.structure);
-    this.lastTime = time;
+    this.lastTime = lastTime2;
   }
   draw(ctx) {
-    drawLetter(ctx, this);
+    drawBrick(ctx, this);
   }
   /**
    * @param time 每帧调用时间戳
@@ -257,14 +370,14 @@ class Brick {
     return false;
   }
   left(mapBinary) {
-    if (this.inBorder("left"))
+    if (this.isAtBorder("left"))
       return;
     if (!this.isOverlap(mapBinary, this.getBinary(), this.x - 1)) {
       this.x--;
     }
   }
   right(mapBinary) {
-    if (this.inBorder("right"))
+    if (this.isAtBorder("right"))
       return;
     if (!this.isOverlap(mapBinary, this.getBinary(), this.x + 1)) {
       this.x++;
@@ -313,9 +426,9 @@ class Brick {
   getBinary(structure = this.structure, x = this.x) {
     const binary = [];
     const len = structure[0].length;
-    for (let i = structure.length - 1; i >= 0; i--) {
+    const carry = gameParam.column - x - len;
+    for (let i = len - 1; i >= 0; i--) {
       let r;
-      let carry = gameParam.column - x - len;
       if (carry >= 0) {
         r = parseInt(structure[i], 2) << carry;
       } else {
@@ -351,17 +464,74 @@ class Brick {
     }
     return false;
   }
-  inBorder(direction) {
-    let binary = this.getBinary();
-    let settle = direction == "left" ? 2 ** (gameParam.column - 1) : 1;
+  /**
+   *
+   * @param direction 方向
+   * @returns 是否在左或右边无法移动
+   */
+  isAtBorder(direction) {
+    const binary = this.getBinary();
+    const maxBorderBinaryValue = { left: 2 ** (gameParam.column - 1), right: 1 };
     for (let i = binary.length - 1; i >= 0; i--) {
-      if (binary[i] & settle) {
+      if (binary[i] & maxBorderBinaryValue[direction]) {
         return true;
       }
     }
     return false;
   }
 }
+const record = (mapBinary, bg, brick) => {
+  if (isGameOver(brick)) {
+    return false;
+  }
+  const binary = brick.getBinary();
+  for (let i = binary.length - 1; i >= 0; i--) {
+    if (binary[i] === 0)
+      continue;
+    mapBinary[brick.y + i] |= binary[i];
+    for (let j = gameParam.column - 1, r = binary[i]; r !== 0; j--, r >>= 1) {
+      if (r & 1) {
+        bg[brick.y + i][j] = brick.color;
+      }
+    }
+  }
+  return true;
+};
+const eliminate = (mapBinary, bg) => {
+  let count = 0;
+  for (let i = gameParam.row - 1; i >= 0; i--) {
+    if (mapBinary[i] === 2 ** gameParam.column - 1) {
+      count++;
+      mapBinary.splice(i, 1);
+      mapBinary.unshift(0);
+      bg.splice(i, 1);
+      bg.unshift(Array.from({ length: gameParam.column }));
+      i++;
+    }
+  }
+  return count;
+};
+const isGameOver = (brick) => {
+  const len = brick.structure.length;
+  for (let i = 0; i < len; i++) {
+    if (brick.y + i < 0)
+      return true;
+  }
+  return false;
+};
+const control = {
+  operate: {
+    left: ["a", "ArrowLeft"],
+    right: ["d", "ArrowRight"],
+    up: ["w", "ArrowUp"],
+    down: ["s", "ArrowDown"],
+    bottom: [" "]
+  },
+  onceKey: ["up", "bottom"],
+  speedUpKey: ["down"],
+  speedUpRate: 2,
+  pause: ["Enter", "p"]
+};
 const isKeyPressed = {
   left: false,
   right: false,
@@ -372,13 +542,11 @@ const isKeyPressed = {
 let activeKey = null;
 window.onkeydown = (e) => {
   switch (true) {
-    case control.pause.some((item) => item === e.key): {
+    case control.pause.some((item) => item === e.key):
       activeKey = e.key;
       break;
-    }
-    case Object.values(control.operate).flat(1).some((item) => item === e.key): {
+    case Object.values(control.operate).flat(1).some((item) => item === e.key):
       activeKey = e.key;
-    }
   }
 };
 window.onkeyup = (e) => {
@@ -423,11 +591,11 @@ const getHandle = /* @__PURE__ */ function() {
     return operation[direction[ctrlKey]].bind(operation);
   };
 }();
-let lastTime = 0;
 const isPauseKey = (activeKey2) => {
   return control.pause.some((item) => item === activeKey2);
 };
-const userAction = function(pause, operation) {
+let lastTime = 0;
+const userActions = function(pause, operation) {
   if (activeKey === null)
     return;
   if (isPauseKey(activeKey)) {
@@ -450,158 +618,165 @@ const userAction = function(pause, operation) {
   if (now - lastTime >= interval) {
     lastTime = now - (now - lastTime) % interval;
     let handle = getHandle(operation, ctrlKey);
-    handle && handle();
+    handle == null ? void 0 : handle();
   }
 };
-class Operate {
-  constructor(game2, mapBinary, brick) {
-    this.game = game2;
-    this.mapBinary = mapBinary;
+class Operation {
+  constructor(renderer, canvasWithMapCtx, brick, Player) {
+    this.renderer = renderer;
+    this.canvasWithMapCtx = canvasWithMapCtx;
+    this.brick = brick;
+    this.Player = Player;
+  }
+  takeTurns(brick) {
     this.brick = brick;
   }
   left() {
-    this.brick.left(this.mapBinary);
+    this.brick.left(this.canvasWithMapCtx.mapBinary);
   }
   right() {
-    this.brick.right(this.mapBinary);
+    this.brick.right(this.canvasWithMapCtx.mapBinary);
   }
   downOne() {
-    const shouldNextOne = this.brick.downOne(this.mapBinary);
+    const shouldNextOne = this.brick.downOne(this.canvasWithMapCtx.mapBinary);
     if (shouldNextOne) {
       this.brick.isRecycle = true;
     }
   }
   downBottom() {
-    const shouldNextOne = this.brick.downBottom(this.mapBinary);
+    const shouldNextOne = this.brick.downBottom(this.canvasWithMapCtx.mapBinary);
     if (shouldNextOne) {
       this.brick.isRecycle = true;
     }
   }
   rotate() {
-    this.brick.rotate(this.mapBinary);
+    this.brick.rotate(this.canvasWithMapCtx.mapBinary);
   }
   pauseGame() {
-    this.game.pause = !this.game.pause;
+    if (this.renderer.pause) {
+      this.Player.playGame();
+    } else {
+      this.Player.pauseGame();
+    }
   }
 }
-const record = (mapBinary, bg, brick) => {
-  if (isGameOver(brick)) {
-    return false;
-  }
-  const binary = brick.getBinary();
-  for (let i = binary.length - 1; i >= 0; i--) {
-    if (binary[i] === 0)
-      continue;
-    mapBinary[brick.y + i] |= binary[i];
-    for (let j = gameParam.column - 1, r = binary[i]; r !== 0; j--, r >>= 1) {
-      if (r & 1) {
-        bg[brick.y + i][j] = brick.color;
-      }
-    }
-  }
-  return true;
-};
-const eliminate = (mapBinary, bg) => {
-  let count = 0;
-  for (let i = gameParam.row - 1; i >= 0; i--) {
-    if (mapBinary[i] === 2 ** gameParam.column - 1) {
-      count++;
-      mapBinary.splice(i, 1);
-      mapBinary.unshift(0);
-      bg.splice(i, 1);
-      bg.unshift(Array.from({ length: gameParam.column }));
-      i++;
-    }
-  }
-  return count;
-};
-const isGameOver = (brick) => {
-  const len = brick.structure.length;
-  for (let i = 0; i < len; i++) {
-    if (brick.y + i < 0)
-      return true;
-  }
-  return false;
-};
-const canvas = $(".canvas.brick");
-const bgCanvas = $(".canvas.bg");
-canvas.height = bgCanvas.height = gameParam.windowHeight;
-canvas.width = bgCanvas.width = gameParam.windowWidth;
-class Game {
-  constructor() {
-    __publicField(this, "mapBinary", new Array(gameParam.row).fill(0));
-    __publicField(this, "bg", Array.from(
-      { length: gameParam.row },
-      () => Array.from({ length: gameParam.column })
-    ));
-    __publicField(this, "ctx", canvas.getContext("2d"));
-    __publicField(this, "bgCtx", bgCanvas.getContext("2d"));
-    __publicField(this, "operate", new Operate(this, this.mapBinary, new Brick()));
+class Renderer {
+  constructor(canvasWithMapCtx) {
+    __publicField(this, "canvasWithMapCtx");
+    __publicField(this, "operation");
+    __publicField(this, "brick");
     __publicField(this, "lastTime", 0);
     __publicField(this, "pauseTime", 0);
-    __publicField(this, "isOver", false);
-    __publicField(this, "pause", false);
+    __publicField(this, "_over", false);
+    __publicField(this, "_pause", false);
+    this.canvasWithMapCtx = canvasWithMapCtx;
+    this.brick = new Brick();
+    this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
+      playGame: this.playGame.bind(this),
+      pauseGame: this.pauseGame.bind(this)
+    });
+  }
+  get over() {
+    return this._over;
+  }
+  get pause() {
+    return this._pause;
   }
   render(time) {
-    this.userAction();
-    if (this.pause) {
+    this.userActions();
+    if (this._pause) {
       this.cachePauseTime(time);
       return;
     }
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.clearCanvas(this.canvasWithMapCtx.ctx);
     this.lastTime = time;
     this.draw();
     this.update(time - this.pauseTime);
     this.canNextOne(time - this.pauseTime);
   }
-  reSetCanvas() {
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    this.bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+  clearCanvas(ctx) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
   draw() {
-    this.operate.brick.draw(this.ctx);
+    this.operation.brick.draw(this.canvasWithMapCtx.ctx);
   }
   update(time) {
-    const shouldNextOne = this.operate.brick.update(time, this.mapBinary);
+    const shouldNextOne = this.operation.brick.update(
+      time,
+      this.canvasWithMapCtx.mapBinary
+    );
     if (shouldNextOne) {
-      this.operate.brick.isRecycle = true;
+      this.operation.brick.isRecycle = true;
     }
   }
   canNextOne(time) {
-    if (this.operate.brick.isRecycle) {
+    if (this.operation.brick.isRecycle) {
       this.newNextOne(time);
     }
   }
   newNextOne(time) {
-    if (!record(this.mapBinary, this.bg, this.operate.brick)) {
-      this.isOver = true;
+    if (!record(
+      this.canvasWithMapCtx.mapBinary,
+      this.canvasWithMapCtx.bg,
+      this.brick
+    )) {
+      this._over = true;
       return;
     }
-    eliminate(this.mapBinary, this.bg);
-    drawBg(this.bgCtx, this.bg);
-    this.operate.brick = new Brick(time);
+    eliminate(this.canvasWithMapCtx.mapBinary, this.canvasWithMapCtx.bg);
+    drawBg(this.canvasWithMapCtx.bgCtx, this.canvasWithMapCtx.bg);
+    this.brick = new Brick(time);
+    this.operation.takeTurns(this.brick);
   }
   cachePauseTime(time) {
     this.pauseTime += time - this.lastTime;
     this.lastTime = time;
   }
-  userAction() {
-    userAction(this.pause, this.operate);
+  playGame() {
+    this._pause = false;
+  }
+  pauseGame() {
+    this._pause = true;
+  }
+  userActions() {
+    userActions(this._pause, this.operation);
   }
 }
-let game = new Game();
-const checkGameOver = (game2) => {
-  if (game2.isOver) {
-    alert("Game Over");
-    reStartGame();
+class Game {
+  constructor() {
+    __publicField(this, "canvasWithMapCtx");
+    __publicField(this, "renderer");
+    __publicField(this, "startWithEnd");
+    this.canvasWithMapCtx = new CanvasWithMapCtx();
+    this.renderer = new Renderer(this.canvasWithMapCtx);
+    this.startWithEnd = customRaf((time = performance.now()) => {
+      this.renderer.render(time);
+    }, gameParam.FPS);
   }
-};
-const reStartGame = () => {
-  game.reSetCanvas();
-  game = new Game();
-};
-const [start] = customRaf((time = performance.now()) => {
-  game.render(time);
-  checkGameOver(game);
-}, gameParam.FPS);
-start();
+  get over() {
+    return this.renderer.over;
+  }
+  get pause() {
+    return this.renderer.pause;
+  }
+  startGame() {
+    this.startWithEnd[0]();
+  }
+  cancelGame() {
+    this.startWithEnd[1]();
+  }
+  restartGame() {
+    this.canvasWithMapCtx.cleanUpCanvas();
+    this.canvasWithMapCtx = new CanvasWithMapCtx();
+    this.renderer = new Renderer(this.canvasWithMapCtx);
+  }
+  playGame() {
+    this.renderer.playGame();
+  }
+  pauseGame() {
+    this.renderer.pauseGame();
+  }
+}
+const game = new Game();
+game.startGame();
+console.log(game);

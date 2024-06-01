@@ -1,5 +1,10 @@
 {
   "description": "",
+  "scripts": {
+    "dev": "vite",
+    "prod": "vite build --minify=false --base=./ --outDir=docs",
+    "typeCheck": "tsc --noEmit"
+  },
   "dependencies": {
     "typescript": "^5.4.5",
     "vite": "^5.2.10"
