@@ -6,15 +6,19 @@ import Operation from "./operate"
 import { ICanvasWithMapCtx, IRenderer } from "./types"
 
 export default class Renderer implements IRenderer {
-  constructor(private canvasWithMapCtx: ICanvasWithMapCtx) {}
-  private operation = new Operation(this, this.canvasWithMapCtx, new Brick(), {
-    playGame: this.playGame.bind(this),
-    pauseGame: this.pauseGame.bind(this),
-  })
+  private canvasWithMapCtx: ICanvasWithMapCtx
+  private operation: Operation
+  constructor(canvasWithMapCtx: ICanvasWithMapCtx) {
+    this.canvasWithMapCtx = canvasWithMapCtx
+    this.operation = new Operation(this, this.canvasWithMapCtx, new Brick(), {
+      playGame: this.playGame.bind(this),
+      pauseGame: this.pauseGame.bind(this),
+    })
+  }
   private lastTime = 0
   private pauseTime = 0
-  _over: boolean = false
-  _pause: boolean = false
+  private _over: boolean = false
+  private _pause: boolean = false
   get over() {
     return this._over
   }
@@ -23,7 +27,7 @@ export default class Renderer implements IRenderer {
   }
   render(time: number) {
     this.userActions()
-    if (this.pause) {
+    if (this._pause) {
       this.cachePauseTime(time)
       return
     }
@@ -81,6 +85,6 @@ export default class Renderer implements IRenderer {
     this._pause = true
   }
   private userActions() {
-    userActions(this.pause, this.operation)
+    userActions(this._pause, this.operation)
   }
 }

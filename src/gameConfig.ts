@@ -5,9 +5,9 @@ const { width, height } = container.getBoundingClientRect()
 export const gameParam: GameParam = {
   column: 10,
   row: 20,
-  FPS: 60,
+  FPS: 165,
   speed: 2,
-  keySpeed: 10,
+  keySpeed: 8,
   score: 0,
   devicePixelRatio: window.devicePixelRatio,
   // 给方块计算出整数值宽高，不然小数情况可能会出现方块间的间隙
