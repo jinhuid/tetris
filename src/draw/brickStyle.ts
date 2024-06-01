@@ -1,5 +1,5 @@
 import { Brick } from "../brick"
-import { gameParam } from "../config"
+import { gameParam } from "../gameConfig"
 
 export const drawStyle = (
   ctx: CanvasRenderingContext2D,

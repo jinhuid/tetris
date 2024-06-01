@@ -1,5 +1,6 @@
-import { gameParam, control } from "./config"
-import { OperateEvents } from "./types"
+import { gameParam } from "../gameConfig"
+import { OperateEvents } from "../types"
+import { control } from "./inputHandlerConfig"
 
 const isKeyPressed = {
   left: false,

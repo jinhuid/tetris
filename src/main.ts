@@ -1,4 +1,4 @@
-import { gameParam } from "./config"
+import { gameParam } from "./gameConfig"
 import Game from "./game"
 import { customRaf } from "./utils"
 

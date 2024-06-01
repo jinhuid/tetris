@@ -1,5 +1,5 @@
 import { Brick } from "../brick"
-import { gameParam } from "../config"
+import { gameParam } from "../gameConfig"
 import { drawStyle } from "./brickStyle"
 
 const offsetCanvas = document.createElement("canvas")

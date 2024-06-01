@@ -1,6 +1,6 @@
 import { Brick } from "./brick"
-import { gameParam } from "./config"
-import { drawBg } from "./draw"
+import { drawBg } from "./draw/index"
+import { gameParam } from "./gameConfig"
 import { eliminate, record } from "./helper"
 import { userActions } from "./inputHandler"
 import Operate from "./operate"
