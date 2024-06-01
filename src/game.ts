@@ -1,10 +1,10 @@
 import { Brick } from "./brick"
 import { gameParam } from "./config"
 import { drawBg } from "./draw"
+import { eliminate, record } from "./helper"
 import { userActions } from "./inputHandler"
 import Operate from "./operate"
-import { eliminate, record } from "./helper"
-import { BrickColor } from "./types"
+import { BrickColor, IGame } from "./types"
 import { $ } from "./utils"
 
 const canvas = $(".canvas.brick") as HTMLCanvasElement
@@ -12,14 +12,6 @@ const bgCanvas = $(".canvas.bg") as HTMLCanvasElement
 
 canvas.height = bgCanvas.height = gameParam.windowHeight
 canvas.width = bgCanvas.width = gameParam.windowWidth
-
-interface IGame {
-  isOver: boolean
-  isPause: boolean
-  render: (time: number) => void
-  clearBrick: () => void
-  clearBg: () => void
-}
 
 export default class Game implements IGame {
   private mapBinary = new Array(gameParam.row).fill(0) as number[]

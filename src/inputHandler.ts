@@ -17,15 +17,13 @@ type Control = keyof typeof control.operate
 let activeKey: MoveKeys | PauseKeys | null = null
 window.onkeydown = (e) => {
   switch (true) {
-    case control.pause.some((item) => item === e.key): {
+    case control.pause.some((item) => item === e.key):
       activeKey = e.key as PauseKeys
       break
-    }
     case Object.values(control.operate)
       .flat(1)
-      .some((item) => item === e.key): {
+      .some((item) => item === e.key):
       activeKey = e.key as MoveKeys
-    }
   }
 }
 

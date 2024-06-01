@@ -6,6 +6,6 @@
     "lib": ["esnext", "dom"],
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
   }
 }

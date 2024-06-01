@@ -1,24 +1,7 @@
-import { gameParam, bricks } from "./config"
-import { drawLetter } from "./draw"
-import { BinaryString, BrickColor, BrickLetter, BrickStruct } from "./types"
+import { bricks, gameParam } from "../config"
+import { drawBrick } from "../draw"
+import { BinaryString, BrickLetter, BrickStruct, IBrick } from "../types"
 
-export interface IBrick {
-  letter: BrickLetter
-  color: BrickColor
-  structure: BinaryString<BrickStruct>
-  x: number
-  y: number
-  width: number
-  height: number
-  isRecycle: boolean
-  draw(ctx: CanvasRenderingContext2D): void
-  update(time: number, mapBinary: number[]): boolean
-  left(mapBinary: number[]): void
-  right(mapBinary: number[]): void
-  downOne(mapBinary: number[]): boolean
-  downBottom(mapBinary: number[]): boolean
-  rotate(mapBinary: number[]): void
-}
 
 const getRandomLetter = (): BrickLetter => {
   const letters = Object.keys(bricks) as BrickLetter[]
@@ -41,7 +24,7 @@ export class Brick implements IBrick {
   isRecycle = false
   constructor(public lastTime: number = performance.now()) {}
   draw(ctx: CanvasRenderingContext2D) {
-    drawLetter(ctx, this)
+    drawBrick(ctx, this)
   }
   /**
    * @param time 每帧调用时间戳
@@ -61,13 +44,13 @@ export class Brick implements IBrick {
     return false
   }
   left(mapBinary: number[]) {
-    if (this.inBorder("left")) return
+    if (this.isAtBorder("left")) return
     if (!this.isOverlap(mapBinary, this.getBinary(), this.x - 1)) {
       this.x--
     }
   }
   right(mapBinary: number[]) {
-    if (this.inBorder("right")) return
+    if (this.isAtBorder("right")) return
     if (!this.isOverlap(mapBinary, this.getBinary(), this.x + 1)) {
       this.x++
     }
@@ -112,12 +95,12 @@ export class Brick implements IBrick {
     }
     newStructure = newStructure.map((s) =>
       s.join("")
-    ) as BinaryString<BrickStruct>
+    ) as unknown as BinaryString<BrickStruct>
     const newBinary = this.getBinary(newStructure)
     if (this.isOverlap(mapBinary, newBinary)) return
     this.structure = newStructure
   }
-  private getBinary<T extends BrickStruct>(
+  getBinary<T extends BrickStruct>(
     structure: BinaryString<T> = this.structure as BinaryString<T>,
     x: number = this.x
   ) {
@@ -165,11 +148,16 @@ export class Brick implements IBrick {
     }
     return false
   }
-  private inBorder(direction: string) {
-    let binary = this.getBinary()
-    let settle = direction == "left" ? 2 ** (gameParam.column - 1) : 1
+  /**
+   *
+   * @param direction 方向
+   * @returns 是否在左或右边无法移动
+   */
+  private isAtBorder(direction: "left" | "right") {
+    const binary = this.getBinary()
+    const maxBorderBinaryValue = { left: 2 ** (gameParam.column - 1), right: 1 }
     for (let i = binary.length - 1; i >= 0; i--) {
-      if (binary[i] & settle) {
+      if (binary[i] & maxBorderBinaryValue[direction]) {
         return true
       }
     }

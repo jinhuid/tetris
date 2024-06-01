@@ -1,8 +1,8 @@
-import {  Bricks } from "./types"
+import { Bricks, GameParam } from "./types"
 import { $ } from "./utils"
 const container = $("#container") as HTMLDivElement
 const { width, height } = container.getBoundingClientRect()
-export const gameParam = {
+export const gameParam:GameParam = {
   column: 10,
   row: 20,
   FPS: 60,
@@ -10,13 +10,19 @@ export const gameParam = {
   keySpeed: 10,
   score: 0,
   devicePixelRatio: window.devicePixelRatio,
-  windowWidth: width * devicePixelRatio,
-  windowHeight: height * devicePixelRatio,
+  // 给方块计算出整数值宽高，不然小数情况可能会出现方块间的间隙
   get brickWidth() {
-    return this.windowWidth / this.column
+    return Math.round((width * this.devicePixelRatio) / this.column)
   },
   get brickHeight() {
-    return this.windowHeight / this.row
+    return Math.round((height * this.devicePixelRatio) / this.row)
+  },
+  // 以方块的整数值加上行列算出整个画布的宽高
+  get windowWidth() {
+    return this.brickWidth * this.column
+  },
+  get windowHeight() {
+    return this.brickHeight * this.row
   },
 }
 
@@ -64,6 +70,10 @@ export const bricks:Bricks = {
              "111",
              "010"],
   },
+  '.':{
+    color:'green',
+    struct:['1']
+  }
 }
 
 export const control = {
