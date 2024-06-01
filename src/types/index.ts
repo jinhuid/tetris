@@ -49,48 +49,46 @@ export type OperateEvents = {
 export type Bricks = {
   [key: string]: {
     color: string
-    struct: Struct<1> | Struct<2> | Struct<3> | Struct<4>
+    struct: Readonly<Struct<1> | Struct<2> | Struct<3> | Struct<4>>
   }
   o: {
     color: "#FADADD"
-    struct: Struct<2>
+    struct: Readonly<Struct<2>>
   }
   i: {
     color: "#F7E9D4"
-    struct: Struct<4>
+    struct: Readonly<Struct<4>>
   }
   s: {
     color: "#C8E6C9"
-    struct: Struct<3>
+    struct: Readonly<Struct<3>>
   }
   z: {
     color: "#B3E5FC"
-    struct: Struct<3>
+    struct: Readonly<Struct<3>>
   }
   l: {
     color: "#FFCC80"
-    struct: Struct<3>
+    struct: Readonly<Struct<3>>
   }
   j: {
     color: "#FFEE58"
-    struct: Struct<3>
+    struct: Readonly<Struct<3>>
   }
   t: {
     color: "#CE93D8"
-    struct: Struct<3>
+    struct: Readonly<Struct<3>>
   }
 }
 
-export type DrawBrick = {
+export interface IBrick {
+  letter: BrickLetter
   x: number
   y: number
   width: number
   height: number
   color: BrickColor
   structure: BinaryString<BrickStruct>
-}
-
-export interface IBrick {
   isRecycle: boolean
   draw(ctx: CanvasRenderingContext2D): void
   update(time: number, mapBinary: number[]): boolean

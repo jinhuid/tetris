@@ -1,5 +1,5 @@
 import { gameParam } from "../gameConfig"
-import { DrawBrick } from "../types"
+import { IBrick } from "../types"
 import { drawStyle } from "./brickStyle"
 
 const offsetCanvas = document.createElement("canvas")
@@ -12,7 +12,7 @@ const cache: Record<string, number> = {}
 
 export const drawBrickPiece = (
   ctx: CanvasRenderingContext2D,
-  { x, y, width, height, color }: DrawBrick
+  { x, y, width, height, color }: IBrick
 ) => {
   if (color in cache) {
     ctx.drawImage(
@@ -34,7 +34,7 @@ export const drawBrickPiece = (
     width,
     height,
     color,
-  } as DrawBrick)
+  } as IBrick)
   cache[color] = index++
   ctx.drawImage(
     offsetCanvas,

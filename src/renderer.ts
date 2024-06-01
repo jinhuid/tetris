@@ -8,9 +8,11 @@ import { ICanvasWithMapCtx, IRenderer } from "./types"
 export default class Renderer implements IRenderer {
   private canvasWithMapCtx: ICanvasWithMapCtx
   private operation: Operation
+  private brick: Brick
   constructor(canvasWithMapCtx: ICanvasWithMapCtx) {
     this.canvasWithMapCtx = canvasWithMapCtx
-    this.operation = new Operation(this, this.canvasWithMapCtx, new Brick(), {
+    this.brick = new Brick()
+    this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
     })
@@ -64,7 +66,7 @@ export default class Renderer implements IRenderer {
       !record(
         this.canvasWithMapCtx.mapBinary,
         this.canvasWithMapCtx.bg,
-        this.operation.brick
+        this.brick
       )
     ) {
       this._over = true
@@ -72,7 +74,8 @@ export default class Renderer implements IRenderer {
     }
     eliminate(this.canvasWithMapCtx.mapBinary, this.canvasWithMapCtx.bg)
     drawBg(this.canvasWithMapCtx.bgCtx, this.canvasWithMapCtx.bg)
-    this.operation.takeTurns(new Brick(time))
+    this.brick = new Brick(time)
+    this.operation.takeTurns(this.brick)
   }
   private cachePauseTime(time: number) {
     this.pauseTime += time - this.lastTime

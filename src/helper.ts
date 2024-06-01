@@ -1,5 +1,5 @@
 import { gameParam } from "./gameConfig"
-import { BrickColor, IBrick } from "./types"
+import { BrickColor,  IBrick } from "./types"
 
 /**
  * 记录方块在地图上的位置
