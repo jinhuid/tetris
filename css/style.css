@@ -32,7 +32,7 @@
   background-color: rgb(158,173,134);
   /* z-index: ; */
 }
-button,.score{
+button,.score,.eliminate{
   padding: 8px 16px;
   color: white;
   border: none;
@@ -54,6 +54,38 @@ button,.score{
 .start:hover{
   background-color: #64c88a;
 }
+.next_brick{
+  position: absolute;
+  background-color:white ;
+  border: 1px solid black;
+  top: 0;
+  right: 0;
+  transform-origin:right center ;
+  transform: scale(0.4);
+}
+
+.score{
+  position: absolute;
+  background-color: brown;
+  top: 20%;
+  right: 0;
+}
+.eliminate{
+  position: absolute;
+  background-color: brown;
+  top: 30%;
+  right: 0;
+}
+.regame{
+  position: absolute;
+  background-color: brown;
+  top: 40%;
+  right: 0;
+}
+
+.restart{
+  display: none;
+}
 .pause{
   display: none;
   position: absolute;
@@ -61,13 +93,3 @@ button,.score{
   top: 50%;
   right: 0;
 }
-.score{
-  position: absolute;
-  background-color: brown;
-  top: 20%;
-  right: 0;
-}
-.restart{
-  display: none;
-}
-

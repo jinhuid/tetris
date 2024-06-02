@@ -52,7 +52,9 @@ export interface IGame extends PlayWithPause {
 }
 
 export interface EmitterEvents {
-  scoreUpdate?: Function[]
+  updateScore?: Function[]
+  updateEliminate?:Function[]
+  updateNextBrick?: Function[]
   gameOver?: Function[]
 }
 

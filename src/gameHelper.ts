@@ -1,9 +1,14 @@
+import { bricks } from "./brick/brickConfig"
 import { gameParam } from "./gameConfig"
 import { ICanvasWithMapCtx } from "./types"
-import { IBrick } from "./types/brick"
+import { BrickLetter, IBrick } from "./types/brick"
 import { SinglePattern } from "./utils"
 
 class GameHelper {
+  getRandomLetter(): BrickLetter {
+    const letters = Object.keys(bricks) as BrickLetter[]
+    return letters[(Math.random() * letters.length) >> 0]
+  }
   /**
    * @dec 记录方块的落点位置 以及它的颜色
    * @returns 是否成功记录 如果失败就是游戏结束

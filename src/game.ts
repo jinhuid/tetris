@@ -1,7 +1,7 @@
 import CanvasWithMapCtx from "./canvasWithMapCtx"
 import { gameParam } from "./gameConfig"
 import Renderer from "./renderer"
-import Scorer from "./scorer"
+import { Scorer, scorer } from "./scorer"
 import { ICanvasWithMapCtx, IGame, IRenderer } from "./types"
 import { customRaf } from "./utils"
 
@@ -10,9 +10,9 @@ export default class Game implements IGame {
   private renderer: IRenderer
   private Scorer: Scorer
   private startWithEnd: readonly [IGame["startGame"], IGame["cancelGame"]]
-  constructor(updateScore?: (score: number) => void) {
+  constructor() {
     this.canvasWithMapCtx = new CanvasWithMapCtx()
-    this.Scorer = new Scorer(updateScore)
+    this.Scorer = scorer
     this.renderer = new Renderer(this.canvasWithMapCtx)
     this.startWithEnd = customRaf((time: number = performance.now()) => {
       this.renderer.render(time)

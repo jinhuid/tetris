@@ -1,28 +1,38 @@
-import { gameParam } from "../gameConfig"
 import { drawBrick } from "../draw"
-import { BinaryString, BrickLetter, BrickStruct, IBrick } from "../types/brick"
+import { gameParam } from "../gameConfig"
+import {
+  BinaryString,
+  BrickColor,
+  BrickStruct,
+  Bricks,
+  IBrick,
+} from "../types/brick"
 import { bricks } from "./brickConfig"
 
-const getRandomLetter = (): BrickLetter => {
-  const letters = Object.keys(bricks) as BrickLetter[]
-  return letters[(Math.random() * letters.length) >> 0]
-}
 const getY = (structure: BinaryString<BrickStruct>) => {
   const index = structure.findLastIndex((s) => +s !== 0)
   if (index === -1) return -structure.length
   return -index - 1
 }
-
 export class Brick implements IBrick {
-  readonly letter = getRandomLetter()
-  readonly color = bricks[this.letter].color
-  readonly width = gameParam.brickWidth
-  readonly height = gameParam.brickHeight
-  structure = bricks[this.letter].struct
-  x = gameParam.column / 2 - 1
-  y = getY(this.structure)
+  readonly color: BrickColor
+  readonly width: number
+  readonly height: number
+  public structure: BinaryString<BrickStruct>
+  public x: number
+  public y: number
   isRecycle = false
-  constructor(private lastTime: number = performance.now()) {}
+  constructor(
+    public letter: keyof Bricks,
+    public lastTime: number = performance.now()
+  ) {
+    this.color = bricks[this.letter].color
+    this.width = gameParam.brickWidth
+    this.height = gameParam.brickHeight
+    this.structure = bricks[this.letter].struct
+    this.x = gameParam.column / 2 - 1
+    this.y = getY(this.structure)
+  }
   draw(ctx: CanvasRenderingContext2D) {
     drawBrick(ctx, this)
   }
@@ -117,6 +127,9 @@ export class Brick implements IBrick {
       binary.unshift(r)
     }
     return binary
+  }
+  correctLastTime(time: number) {
+    this.lastTime = time
   }
   /**
    *

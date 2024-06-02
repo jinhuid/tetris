@@ -1,26 +1,27 @@
-export default class Scorer {
-  static instance: Scorer
-  private cb: ((score: number) => void) | undefined
-  constructor(cb?: (score: number) => void) {
-    if (Scorer.instance) {
-      return Scorer.instance
-    }
-    if (cb) {
-      this.cb = cb
-    }
-    Scorer.instance = this
-  }
+import { SinglePattern } from "./utils"
+
+class Scorer {
   private _score = 0
+  private _eliminateNum = 0
   get score() {
     return this._score
   }
-  bonusPoint(v: number) {
-    this._score += v
-    if (this.cb) {
-      this.cb(this._score)
-    }
+  get eliminateNum() {
+    return this._eliminateNum
   }
-  makeZero() {
+  scoreIncrease(v: number) {
+    this._score += v
+  }
+  eliminateNumIncrease(v: number) {
+    this._eliminateNum += v
+  }
+  reset() {
     this._score = 0
+    this._eliminateNum = 0
   }
 }
+
+const SingleScorer = SinglePattern(Scorer)
+const scorer = new SingleScorer()
+export { scorer }
+export type { Scorer }
