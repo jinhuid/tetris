@@ -54,4 +54,19 @@ function throttle(fn: (...args: any[]) => {}, delay: number) {
   }
 }
 
-export { $, customRaf, throttle }
+function SinglePattern<T extends new (...args: any[]) => any>(Ctor: T) {
+  let instance: null | InstanceType<typeof Ctor>
+  const p = new Proxy(Ctor, {
+    construct(target, args) {
+      if (!instance) {
+        instance = Reflect.construct(target, args)
+      }
+      return instance as InstanceType<typeof Ctor>
+    },
+  })
+  Ctor.prototype.constructor = p
+  return p
+}
+
+
+export { $, customRaf, throttle, SinglePattern }

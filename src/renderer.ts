@@ -1,17 +1,24 @@
 import { Brick } from "./brick"
 import { drawBg } from "./draw/index"
-import { eliminate, record } from "./helper"
+import { GameHelper, gameHelper } from "./gameHelper"
 import { userActions } from "./inputHandler"
 import Operation from "./operate"
+import Scorer from "./scorer"
 import { ICanvasWithMapCtx, IRenderer } from "./types"
 
 export default class Renderer implements IRenderer {
   private canvasWithMapCtx: ICanvasWithMapCtx
   private operation: Operation
+  private scorer: Scorer
+  private gameHelper: GameHelper
   private brick: Brick
+  private newBrick: Brick
   constructor(canvasWithMapCtx: ICanvasWithMapCtx) {
     this.canvasWithMapCtx = canvasWithMapCtx
+    this.scorer = new Scorer()
+    this.gameHelper = gameHelper
     this.brick = new Brick()
+    this.newBrick = new Brick()
     this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
@@ -61,20 +68,24 @@ export default class Renderer implements IRenderer {
     }
   }
   private newNextOne(time: number) {
-    // 是否成功记录 如果失败就是游戏结束
-    if (
-      !record(
-        this.canvasWithMapCtx.mapBinary,
-        this.canvasWithMapCtx.bg,
-        this.brick
-      )
-    ) {
+    const isSuccess = !this.gameHelper.record(
+      this.canvasWithMapCtx.mapBinary,
+      this.canvasWithMapCtx.bg,
+      this.brick
+    )
+    if (isSuccess) {
       this._over = true
       return
     }
-    eliminate(this.canvasWithMapCtx.mapBinary, this.canvasWithMapCtx.bg)
+    const row = this.gameHelper.eliminate(
+      this.canvasWithMapCtx.mapBinary,
+      this.canvasWithMapCtx.bg
+    )
+    const score = this.gameHelper.computeScore(row)
+    this.scorer.bonusPoint(score)
     drawBg(this.canvasWithMapCtx.bgCtx, this.canvasWithMapCtx.bg)
-    this.brick = new Brick(time)
+    this.brick = this.newBrick
+    this.newBrick = new Brick(time)
     this.operation.takeTurns(this.brick)
   }
   private cachePauseTime(time: number) {
