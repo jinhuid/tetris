@@ -1,16 +1,10 @@
-import { isBinaryString } from "./helper"
+import { Binary, isBinaryString } from "./helper"
 
 export type BinaryString<T extends BrickStruct> = {
   [K in keyof T]: isBinaryString<T[K]>
 }
 
 // type a = BinaryString<("00" | "10" | "01" | "11")[]>
-
-export type Binary<
-  T extends number,
-  R extends string = "",
-  Arr extends string[] = []
-> = Arr["length"] extends T ? R : Binary<T, `${R}${"0" | "1"}`, [...Arr, ""]>
 
 export type Struct<
   T extends number,
