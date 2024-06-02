@@ -1,4 +1,5 @@
 import Ui from "./ui";
 
 
-new Ui()
+const ui = new Ui()
+console.log(ui);

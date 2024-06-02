@@ -1,5 +1,4 @@
 import { Brick } from "./brick"
-import { drawBg } from "./draw/index"
 import { GameHelper, gameHelper } from "./gameHelper"
 import { userActions } from "./inputHandler"
 import Operation from "./operate"
@@ -82,19 +81,27 @@ export default class Renderer implements IRenderer {
     }
     const row = this.gameHelper.eliminate(
       this.canvasWithMapCtx.mapBinary,
+      this.canvasWithMapCtx.bg,
+      this.brick.y,
+      Math.min(
+        this.brick.y + this.brick.structure.length,
+        this.canvasWithMapCtx.mapBinary.length
+      )
+    )
+    this.gameHelper.drawBg(
+      this.canvasWithMapCtx.bgCtx,
       this.canvasWithMapCtx.bg
     )
     const score = this.gameHelper.computeScore(row)
     this.scorer.scoreIncrease(score)
     this.scorer.eliminateNumIncrease(row)
-    this.eventEmitter.emit("updateScore", this.scorer.score)
-    this.eventEmitter.emit("updateEliminate", this.scorer.eliminateNum)
-    drawBg(this.canvasWithMapCtx.bgCtx, this.canvasWithMapCtx.bg)
     this.brick = this.nextBrick
     this.nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
-    this.eventEmitter.emit("updateNextBrick", this.nextBrick)
     this.brick.correctLastTime(time)
     this.operation.takeTurns(this.brick)
+    this.eventEmitter.emit("updateScore", this.scorer.score)
+    this.eventEmitter.emit("updateEliminate", this.scorer.eliminateNum)
+    this.eventEmitter.emit("updateNextBrick", this.nextBrick)
   }
   private cachePauseTime(time: number) {
     this.pauseTime += time - this.lastTime

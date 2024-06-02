@@ -14,21 +14,21 @@ export default class CanvasWithMapCtx implements ICanvasWithMapCtx {
   static bgCtx = bgCanvas.getContext("2d")!
   ctx: CanvasRenderingContext2D
   bgCtx: CanvasRenderingContext2D
-  mapBinary: number[]
-  bg: BrickColor[][]
+  mapBinary: ICanvasWithMapCtx["mapBinary"]
+  bg: ICanvasWithMapCtx["bg"]
   constructor() {
     this.ctx = CanvasWithMapCtx.ctx
     this.bgCtx = CanvasWithMapCtx.bgCtx
     this.mapBinary = new Array(gameParam.row).fill(0) as number[]
     this.bg = Array.from({ length: gameParam.row }, () =>
-      Array.from({ length: gameParam.column })
+      Array.from({ length: gameParam.column }, () => void 0)
     )
   }
   cleanUpCanvas() {
     this.clearCanvas(this.ctx)
     this.clearCanvas(this.bgCtx)
   }
-  clearCanvas (ctx:CanvasRenderingContext2D) {
+  clearCanvas(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
 }

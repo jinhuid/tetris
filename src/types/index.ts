@@ -29,7 +29,7 @@ export interface ICanvasWithMapCtx {
   bgCtx: CanvasRenderingContext2D
   cleanUpCanvas: () => void
   mapBinary: number[]
-  bg: BrickColor[][]
+  bg: (BrickColor | undefined)[][]
 }
 
 export interface PlayWithPause {
@@ -53,7 +53,7 @@ export interface IGame extends PlayWithPause {
 
 export interface EmitterEvents {
   updateScore?: Function[]
-  updateEliminate?:Function[]
+  updateEliminate?: Function[]
   updateNextBrick?: Function[]
   gameOver?: Function[]
 }

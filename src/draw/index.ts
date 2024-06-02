@@ -1,5 +1,4 @@
-import { gameParam } from "../gameConfig"
-import { BrickColor, IBrick } from "../types/brick"
+import { IBrick } from "../types/brick"
 import { drawBrickPiece } from "./drawBrickPiece"
 
 export const drawBrick = (
@@ -20,23 +19,4 @@ export const drawBrick = (
   }
 }
 
-export const drawBg = function (
-  ctx: CanvasRenderingContext2D,
-  colors: BrickColor[][],
-  brickWidth: number = gameParam.brickWidth,
-  brickHeight: number = gameParam.brickHeight
-) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-  for (let i = 0; i < colors.length; i++) {
-    for (let j = 0; j < colors[i].length; j++) {
-      if (colors[i][j] === void 0) continue
-      drawBrickPiece(ctx, {
-        x: j * brickWidth,
-        y: i * brickHeight,
-        width: brickWidth,
-        height: brickHeight,
-        color: colors[i][j],
-      } as IBrick)
-    }
-  }
-}
+

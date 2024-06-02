@@ -1,10 +1,12 @@
 import { bricks } from "./brick/brickConfig"
+import { drawBrickPiece } from "./draw/drawBrickPiece"
 import { gameParam } from "./gameConfig"
 import { ICanvasWithMapCtx } from "./types"
 import { BrickLetter, IBrick } from "./types/brick"
 import { SinglePattern } from "./utils"
 
 class GameHelper {
+  private eliminateTheLine = 2 ** gameParam.column - 1
   getRandomLetter(): BrickLetter {
     const letters = Object.keys(bricks) as BrickLetter[]
     return letters[(Math.random() * letters.length) >> 0]
@@ -39,18 +41,21 @@ class GameHelper {
    */
   eliminate(
     mapBinary: ICanvasWithMapCtx["mapBinary"],
-    bg: ICanvasWithMapCtx["bg"]
+    bg: ICanvasWithMapCtx["bg"],
+    from: number,
+    to: number
   ) {
     let count = 0
-    for (let i = gameParam.row - 1; i >= 0; i--) {
-      if (mapBinary[i] === 2 ** gameParam.column - 1) {
-        count++
-        mapBinary.splice(i, 1)
+    while (from < to) {
+      if (mapBinary[from] === this.eliminateTheLine) {
+        mapBinary.splice(from, 1)
         mapBinary.unshift(0)
-        bg.splice(i, 1)
-        bg.unshift(Array.from({ length: gameParam.column }))
-        i++
+        bg.splice(from, 1)
+        bg.unshift(new Array(bg[0].length))
+        count++
+        continue
       }
+      from++
     }
     return count
   }
@@ -61,6 +66,26 @@ class GameHelper {
       if (brick.y + i < 0) return true
     }
     return false
+  }
+  drawBg(
+    ctx: CanvasRenderingContext2D,
+    colors: ICanvasWithMapCtx["bg"],
+    brickWidth: number = gameParam.brickWidth,
+    brickHeight: number = gameParam.brickHeight
+  ) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    for (let i = 0; i < colors.length; i++) {
+      for (let j = 0; j < colors[i].length; j++) {
+        if (colors[i][j] === void 0) continue
+        drawBrickPiece(ctx, {
+          x: j * brickWidth,
+          y: i * brickHeight,
+          width: brickWidth,
+          height: brickHeight,
+          color: colors[i][j],
+        } as IBrick)
+      }
+    }
   }
   computeScore(row: number) {
     switch (row) {
