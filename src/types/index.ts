@@ -1,21 +1,5 @@
-import { Binary, isBinaryString } from "./helper"
-
-export type BinaryString<T extends BrickStruct> = {
-  [K in keyof T]: isBinaryString<T[K]>
-}
-
-// type a = BinaryString<("00" | "10" | "01" | "11")[]>
-
-export type Struct<
-  T extends number,
-  R extends any[] = []
-> = R["length"] extends T ? R : Struct<T, [...R, Binary<T>]>
-
-export type BrickLetter = keyof Bricks
-
-export type BrickColor = Bricks[BrickLetter]["color"]
-
-export type BrickStruct = Bricks[BrickLetter]["struct"]
+import { BrickColor } from "./brick"
+import { OptionalKeys } from "./helper"
 
 export type GameParam = {
   readonly windowWidth: number
@@ -25,7 +9,7 @@ export type GameParam = {
   readonly devicePixelRatio: number
   readonly brickWidth: number
   readonly brickHeight: number
-  readonly FPS: number
+  readonly FPS: number | null
   speed: number
   keySpeed: number
   score: number
@@ -38,60 +22,6 @@ export type OperateEvents = {
   downBottom: () => void
   rotate: () => void
   pauseGame: () => void
-}
-
-export type Bricks = {
-  [key: string]: {
-    color: string
-    struct: Readonly<Struct<1> | Struct<2> | Struct<3> | Struct<4>>
-  }
-  o: {
-    color: "#FADADD"
-    struct: Readonly<Struct<2>>
-  }
-  i: {
-    color: "#F7E9D4"
-    struct: Readonly<Struct<4>>
-  }
-  s: {
-    color: "#C8E6C9"
-    struct: Readonly<Struct<3>>
-  }
-  z: {
-    color: "#B3E5FC"
-    struct: Readonly<Struct<3>>
-  }
-  l: {
-    color: "#FFCC80"
-    struct: Readonly<Struct<3>>
-  }
-  j: {
-    color: "#FFEE58"
-    struct: Readonly<Struct<3>>
-  }
-  t: {
-    color: "#CE93D8"
-    struct: Readonly<Struct<3>>
-  }
-}
-
-export interface IBrick {
-  letter: BrickLetter
-  x: number
-  y: number
-  width: number
-  height: number
-  color: BrickColor
-  structure: BinaryString<BrickStruct>
-  isRecycle: boolean
-  draw(ctx: CanvasRenderingContext2D): void
-  update(time: number, mapBinary: number[]): boolean
-  getBinary(): number[]
-  left(mapBinary: number[]): void
-  right(mapBinary: number[]): void
-  downOne(mapBinary: number[]): boolean
-  downBottom(mapBinary: number[]): boolean
-  rotate(mapBinary: number[]): void
 }
 
 export interface ICanvasWithMapCtx {
@@ -119,4 +49,17 @@ export interface IGame extends PlayWithPause {
   startGame: () => void
   restartGame: () => void
   cancelGame: () => void
+}
+
+export interface EmitterEvents {
+  scoreUpdate?: Function[]
+  gameOver?: Function[]
+}
+
+export interface IEventEmitter {
+  events: EmitterEvents
+  on: (event: OptionalKeys<EmitterEvents>, listener: Function) => void
+  emit: (event: OptionalKeys<EmitterEvents>) => void
+  off: (event: OptionalKeys<EmitterEvents>, listener: Function) => void
+  clearAllListeners: () => void
 }

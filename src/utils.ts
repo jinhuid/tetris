@@ -4,7 +4,7 @@ const $ = (selector: string) => {
 
 const customRaf = (
   fn: (time: number, ...args: any[]) => unknown,
-  fps?: number
+  fps?: number | null
 ) => {
   if (!!fps) {
     if (!Number.isInteger(fps) || fps <= 0) {
@@ -67,6 +67,5 @@ function SinglePattern<T extends new (...args: any[]) => any>(Ctor: T) {
   Ctor.prototype.constructor = p
   return p
 }
-
 
 export { $, customRaf, throttle, SinglePattern }

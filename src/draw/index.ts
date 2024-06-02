@@ -1,5 +1,5 @@
 import { gameParam } from "../gameConfig"
-import { BrickColor, IBrick } from "../types"
+import { BrickColor, IBrick } from "../types/brick"
 import { drawBrickPiece } from "./drawBrickPiece"
 
 export const drawBrick = (

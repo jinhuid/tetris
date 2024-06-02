@@ -1,8 +1,4 @@
-import Game from "./game"
-import { $ } from "./utils"
+import Ui from "./ui";
 
-const game = new Game((score) => {
-  $(".score")!.textContent = score + ""
-})
-game.startGame()
-console.log(game)
+
+new Ui()

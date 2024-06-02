@@ -1,5 +1,6 @@
 import { gameParam } from "./gameConfig"
-import { BrickColor, ICanvasWithMapCtx } from "./types"
+import { ICanvasWithMapCtx } from "./types"
+import { BrickColor } from "./types/brick"
 import { $ } from "./utils"
 
 const canvas = $(".canvas.brick") as HTMLCanvasElement

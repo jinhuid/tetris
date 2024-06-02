@@ -1,5 +1,5 @@
 import { gameParam } from "../gameConfig"
-import { IBrick } from "../types"
+import { IBrick } from "../types/brick"
 
 export const drawStyle = (
   ctx: CanvasRenderingContext2D,

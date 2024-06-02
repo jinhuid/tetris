@@ -1,5 +1,6 @@
 import { gameParam } from "./gameConfig"
-import { IBrick, ICanvasWithMapCtx } from "./types"
+import { ICanvasWithMapCtx } from "./types"
+import { IBrick } from "./types/brick"
 import { SinglePattern } from "./utils"
 
 class GameHelper {

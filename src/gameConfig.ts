@@ -1,13 +1,13 @@
 import { GameParam } from "./types"
 import { $ } from "./utils"
-const container = $("#container") as HTMLDivElement
+const container = $(".game") as HTMLDivElement
 const { width, height } = container.getBoundingClientRect()
 export const gameParam: GameParam = {
   column: 10,
   row: 20,
-  FPS: 165,
+  FPS: null,
   speed: 2,
-  keySpeed: 8,
+  keySpeed: 10,
   score: 0,
   devicePixelRatio: window.devicePixelRatio,
   // 给方块计算出整数值宽高，不然小数情况可能会出现方块间的间隙

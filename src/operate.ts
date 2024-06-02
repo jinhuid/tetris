@@ -1,10 +1,10 @@
 import {
-  IBrick,
   ICanvasWithMapCtx,
   IRenderer,
   OperateEvents,
   PlayWithPause,
 } from "./types"
+import { IBrick } from "./types/brick"
 
 export default class Operation implements OperateEvents {
   constructor(

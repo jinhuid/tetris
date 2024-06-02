@@ -5,20 +5,23 @@ import { userActions } from "./inputHandler"
 import Operation from "./operate"
 import Scorer from "./scorer"
 import { ICanvasWithMapCtx, IRenderer } from "./types"
+import { EventEmitter, eventEmitter } from "./ui/eventEmitter"
 
 export default class Renderer implements IRenderer {
   private canvasWithMapCtx: ICanvasWithMapCtx
   private operation: Operation
   private scorer: Scorer
+  private eventEmitter: EventEmitter
   private gameHelper: GameHelper
   private brick: Brick
-  private newBrick: Brick
+  private nextBrick: Brick
   constructor(canvasWithMapCtx: ICanvasWithMapCtx) {
     this.canvasWithMapCtx = canvasWithMapCtx
     this.scorer = new Scorer()
+    this.eventEmitter = eventEmitter
     this.gameHelper = gameHelper
     this.brick = new Brick()
-    this.newBrick = new Brick()
+    this.nextBrick = new Brick()
     this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
@@ -68,12 +71,12 @@ export default class Renderer implements IRenderer {
     }
   }
   private newNextOne(time: number) {
-    const isSuccess = !this.gameHelper.record(
+    const isSuccess = this.gameHelper.record(
       this.canvasWithMapCtx.mapBinary,
       this.canvasWithMapCtx.bg,
       this.brick
     )
-    if (isSuccess) {
+    if (!isSuccess) {
       this._over = true
       return
     }
@@ -83,9 +86,10 @@ export default class Renderer implements IRenderer {
     )
     const score = this.gameHelper.computeScore(row)
     this.scorer.bonusPoint(score)
+    this.eventEmitter.emit("scoreUpdate", this.scorer.score)
     drawBg(this.canvasWithMapCtx.bgCtx, this.canvasWithMapCtx.bg)
-    this.brick = this.newBrick
-    this.newBrick = new Brick(time)
+    this.brick = this.nextBrick
+    this.nextBrick = new Brick(time)
     this.operation.takeTurns(this.brick)
   }
   private cachePauseTime(time: number) {

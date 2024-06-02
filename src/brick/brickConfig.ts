@@ -1,4 +1,4 @@
-import { Bricks } from "../types";
+import { Bricks } from "../types/brick";
 
 // prettier-ignore
 export const bricks:Bricks = {

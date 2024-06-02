@@ -1,6 +1,6 @@
 import { gameParam } from "../gameConfig"
 import { drawBrick } from "../draw"
-import { BinaryString, BrickLetter, BrickStruct, IBrick } from "../types"
+import { BinaryString, BrickLetter, BrickStruct, IBrick } from "../types/brick"
 import { bricks } from "./brickConfig"
 
 const getRandomLetter = (): BrickLetter => {
