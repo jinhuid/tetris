@@ -55,7 +55,6 @@ export default class Renderer implements IRenderer {
     this.operation.brick.draw(this.canvasWithMapCtx.ctx)
   }
   private update(time: number) {
-    // console.log(time)
     const shouldNextOne = this.operation.brick.update(
       time,
       this.canvasWithMapCtx.mapBinary

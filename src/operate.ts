@@ -28,8 +28,8 @@ export default class Operation implements OperateEvents {
       this.brick.isRecycle = true
     }
   }
-  downBottom() {
-    const shouldNextOne = this.brick.downBottom(this.canvasWithMapCtx.mapBinary)
+  downToBottom() {
+    const shouldNextOne = this.brick.downToBottom(this.canvasWithMapCtx.mapBinary)
     if (shouldNextOne) {
       this.brick.isRecycle = true
     }

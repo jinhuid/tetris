@@ -69,6 +69,6 @@ export interface IBrick {
   left(mapBinary: number[]): void;
   right(mapBinary: number[]): void;
   downOne(mapBinary: number[]): boolean;
-  downBottom(mapBinary: number[]): boolean;
+  downToBottom(mapBinary: number[]): boolean;
   rotate(mapBinary: number[]): void;
 }

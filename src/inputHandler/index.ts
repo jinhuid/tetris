@@ -68,7 +68,7 @@ const getHandle = (function () {
     left: "left",
     right: "right",
     down: "downOne",
-    bottom: "downBottom",
+    bottom: "downToBottom",
     up: "rotate",
   } as const
   return (operation: OperateEvents, ctrlKey: Control) => {

@@ -77,7 +77,7 @@ export class Brick implements IBrick {
     }
     return true
   }
-  downBottom(mapBinary: number[]) {
+  downToBottom(mapBinary: number[]) {
     while (!this.isOverlap(mapBinary, this.getBinary(), this.x, this.y + 1)) {
       this.y++
     }

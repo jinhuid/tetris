@@ -36,6 +36,7 @@ export default class Game implements IGame {
   restartGame() {
     this.canvasWithMapCtx.cleanUpCanvas()
     this.canvasWithMapCtx = new CanvasWithMapCtx()
+    this.Scorer.reset()
     this.renderer = new Renderer(this.canvasWithMapCtx)
   }
   playGame() {

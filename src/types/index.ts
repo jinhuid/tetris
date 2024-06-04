@@ -19,7 +19,7 @@ export type OperateEvents = {
   left: () => void
   right: () => void
   downOne: () => void
-  downBottom: () => void
+  downToBottom: () => void
   rotate: () => void
   pauseGame: () => void
 }
