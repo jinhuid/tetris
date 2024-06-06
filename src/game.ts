@@ -1,4 +1,3 @@
-import CanvasWithMapCtx from "./canvasWithMapCtx"
 import { gameParam } from "./gameConfig"
 import Renderer from "./renderer"
 import { IGame, IRenderer } from "./types"
