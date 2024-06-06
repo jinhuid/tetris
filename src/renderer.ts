@@ -1,8 +1,9 @@
 import { Brick } from "./brick"
+import CanvasWithMapCtx from "./canvasWithMapCtx"
 import { GameHelper, gameHelper } from "./gameHelper"
 import { userActions } from "./inputHandler"
 import Operation from "./operate"
-import { Scorer, scorer } from "./scorer"
+import { Scorer } from "./scorer"
 import { ICanvasWithMapCtx, IRenderer } from "./types"
 import { EventEmitter, eventEmitter } from "./ui/eventEmitter"
 
@@ -12,24 +13,30 @@ export default class Renderer implements IRenderer {
   private scorer: Scorer
   private eventEmitter: EventEmitter
   private gameHelper: GameHelper
-  private brick: Brick
-  private nextBrick: Brick
-  constructor(canvasWithMapCtx: ICanvasWithMapCtx) {
-    this.canvasWithMapCtx = canvasWithMapCtx
-    this.scorer = scorer
+  private lastTime = 0
+  private pauseTime = 0
+  private _brick: Brick
+  private _nextBrick: Brick
+  private _over: boolean = false
+  private _pause: boolean = false
+  constructor() {
+    this.canvasWithMapCtx =new CanvasWithMapCtx()
+    this.scorer = new Scorer()
     this.eventEmitter = eventEmitter
     this.gameHelper = gameHelper
-    this.brick = new Brick(this.gameHelper.getRandomLetter())
-    this.nextBrick = new Brick(this.gameHelper.getRandomLetter())
+    this._brick = new Brick(this.gameHelper.getRandomLetter())
+    this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
     this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
     })
   }
-  private lastTime = 0
-  private pauseTime = 0
-  private _over: boolean = false
-  private _pause: boolean = false
+  get brick() {
+    return this._brick
+  }
+  get nextBrick() {
+    return this._nextBrick
+  }
   get over() {
     return this._over
   }
@@ -76,6 +83,7 @@ export default class Renderer implements IRenderer {
     )
     if (!isSuccess) {
       this._over = true
+      this.eventEmitter.emit("gameOver")
       return
     }
     const row = this.gameHelper.eliminate(
@@ -94,8 +102,8 @@ export default class Renderer implements IRenderer {
     const score = this.gameHelper.computeScore(row)
     this.scorer.scoreIncrease(score)
     this.scorer.eliminateNumIncrease(row)
-    this.brick = this.nextBrick
-    this.nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
+    this._brick = this.nextBrick
+    this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
     this.brick.correctLastTime(time)
     this.operation.takeTurns(this.brick)
     this.eventEmitter.emit("updateScore", this.scorer.score)

@@ -1,5 +1,3 @@
-import { SinglePattern } from "./utils"
-
 class Scorer {
   private _score = 0
   private _eliminateNum = 0
@@ -21,7 +19,4 @@ class Scorer {
   }
 }
 
-const SingleScorer = SinglePattern(Scorer)
-const scorer = new SingleScorer()
-export { scorer }
-export type { Scorer }
+export { Scorer }

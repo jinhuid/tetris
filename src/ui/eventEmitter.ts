@@ -1,29 +1,39 @@
 import { EmitterEvents, IEventEmitter } from "../types"
-import { OptionalKeys } from "../types/helper"
 import { SinglePattern } from "../utils"
 
 class EventEmitter implements IEventEmitter {
-  events: EmitterEvents = {}
-  on(event: OptionalKeys<EmitterEvents>, listener: Function) {
+  events: Partial<EmitterEvents> = {}
+  on<E extends keyof EmitterEvents>(
+    event: E,
+    listener: EmitterEvents[E][number]
+  ) {
     if (!this.events[event]) {
       this.events[event] = []
     }
-    this.events[event]!.push(listener)
+    this.events[event]?.push(listener as (...args: any[]) => any)
   }
 
-  emit(event: OptionalKeys<EmitterEvents>, ...args: any[]) {
+  emit<E extends keyof EmitterEvents>(
+    event: E,
+    ...args: Parameters<EmitterEvents[E][number]>
+  ) {
     const listeners = this.events[event]
     if (listeners) {
       listeners.forEach((listener) => {
-        listener(...args)
+        listener(...(args as [any]))
       })
     }
   }
 
-  off(event: OptionalKeys<EmitterEvents>, listener: Function) {
+  off<E extends keyof EmitterEvents>(
+    event: E,
+    listener: EmitterEvents[E][number]
+  ) {
     const listeners = this.events[event]
     if (listeners) {
-      this.events[event] = listeners.filter((l) => l !== listener)
+      this.events[event] = listeners.filter((l) => l !== listener) as ((
+        ...args: any[]
+      ) => any)[]
     }
   }
 

@@ -2,19 +2,15 @@ import { Brick } from "../brick"
 import { drawBrick } from "../draw"
 import Game from "../game"
 import { gameParam } from "../gameConfig"
-import { Scorer, scorer } from "../scorer"
+import { IEventEmitter } from "../types"
 import { $ } from "../utils"
-import { EventEmitter, eventEmitter } from "./eventEmitter"
+import { eventEmitter } from "./eventEmitter"
 
 export default class Ui {
   game: Game
   dom
-  eventEmitter: EventEmitter
-  scorer: Scorer
+  eventEmitter: IEventEmitter = eventEmitter
   constructor() {
-    this.game = new Game()
-    this.eventEmitter = eventEmitter
-    this.scorer = scorer
     this.dom = {
       brickCanvas: $(".brick")! as HTMLCanvasElement,
       bgCanvas: $(".bg")! as HTMLCanvasElement,
@@ -26,29 +22,51 @@ export default class Ui {
       score: $(".score>span")! as HTMLElement,
       eliminate: $(".eliminate>span")! as HTMLElement,
     }
+    this.addEventEmitter()
+    this.addEvent()
     this.dom.nextBrickCanvas.width = gameParam.brickWidth * 4
     this.dom.nextBrickCanvas.height = gameParam.brickHeight * 4
-    this.init()
-    this.addEvent()
+    this.game = new Game()
   }
-  init() {
+  addEventEmitter() {
+    this.eventEmitter.emit("resetDom")
     this.eventEmitter.clearAllListeners()
-    this.eventEmitter.on("updateScore", () => {
-      this.dom.score.innerText = this.scorer.score + ""
+    this.eventEmitter.on("updateScore", (score) => {
+      this.dom.score.innerText = score + ""
     })
-    this.eventEmitter.on("updateEliminate", () => {
-      this.dom.eliminate.innerText = this.scorer.eliminateNum + ""
+    this.eventEmitter.on("updateEliminate", (num) => {
+      this.dom.eliminate.innerText = num + ""
     })
-    this.eventEmitter.on("updateNextBrick", (brick: Brick) => {
+    this.eventEmitter.on("updateNextBrick", (brick) => {
       //清空画布
       this.dom.nextBrickCanvas
         .getContext("2d")!
-        .clearRect(0, 0, this.dom.nextBrickCanvas.width, this.dom.nextBrickCanvas.height)
-      drawBrick(this.dom.nextBrickCanvas.getContext("2d")!, {
-        ...brick,
-        x: 0,
-        y: 0,
-      } as Brick)
+        .clearRect(
+          0,
+          0,
+          this.dom.nextBrickCanvas.width,
+          this.dom.nextBrickCanvas.height
+        )
+      if (brick) {
+        drawBrick(this.dom.nextBrickCanvas.getContext("2d")!, {
+          ...brick,
+          x: 0,
+          y: 0,
+        } as Brick)
+      }
+    })
+    this.eventEmitter.on("startGame", (renderer) => {
+      this.eventEmitter.emit("updateNextBrick", renderer.nextBrick)
+    })
+    this.eventEmitter.on("gameOver", () => {
+      this.game.cancelGame()
+      this.dom.restart.style.display = "block"
+      this.dom.pause.style.display = "none"
+    })
+    this.eventEmitter.on("resetDom", () => {
+      this.eventEmitter.emit("updateScore", 0)
+      this.eventEmitter.emit("updateEliminate", 0)
+      this.eventEmitter.emit("updateNextBrick", null)
     })
   }
   addEvent() {
@@ -67,10 +85,13 @@ export default class Ui {
       }
     })
     this.dom.regame.addEventListener("click", () => {
-      this.scorer.reset()
-      this.eventEmitter.emit("updateScore", this.scorer.score)
+      this.addEventEmitter()
       this.game.restartGame()
-      this.init()
+    })
+    this.dom.restart.addEventListener("click", () => {
+      this.game.restartGame()
+      this.dom.restart.style.display = "none"
+      this.dom.pause.style.display = "block"
     })
   }
 }

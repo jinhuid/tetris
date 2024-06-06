@@ -22,12 +22,13 @@ export default class CanvasWithMapCtx implements ICanvasWithMapCtx {
     this.bg = Array.from({ length: gameParam.row }, () =>
       Array.from({ length: gameParam.column }, () => void 0)
     )
+    this.cleanUpCanvas()
   }
-  cleanUpCanvas() {
+  private cleanUpCanvas() {
     this.clearCanvas(this.ctx)
     this.clearCanvas(this.bgCtx)
   }
-  clearCanvas(ctx: CanvasRenderingContext2D) {
+  private clearCanvas(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
 }

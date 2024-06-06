@@ -1,5 +1,5 @@
+import { Brick } from "../brick"
 import { BrickColor } from "./brick"
-import { OptionalKeys } from "./helper"
 
 export type GameParam = {
   readonly windowWidth: number
@@ -27,7 +27,6 @@ export type OperateEvents = {
 export interface ICanvasWithMapCtx {
   ctx: CanvasRenderingContext2D
   bgCtx: CanvasRenderingContext2D
-  cleanUpCanvas: () => void
   mapBinary: number[]
   bg: (BrickColor | undefined)[][]
 }
@@ -38,6 +37,8 @@ export interface PlayWithPause {
 }
 
 export interface IRenderer extends PlayWithPause {
+  brick: Brick
+  nextBrick: Brick
   over: boolean
   pause: boolean
   render: (time: number) => void
@@ -51,17 +52,31 @@ export interface IGame extends PlayWithPause {
   cancelGame: () => void
 }
 
+// const fnArr: ((a: 1) => void)[] | ((b: 2) => void)[] = []
+// fnArr.push(() => {})
+
 export interface EmitterEvents {
-  updateScore?: Function[]
-  updateEliminate?: Function[]
-  updateNextBrick?: Function[]
-  gameOver?: Function[]
+  updateScore: ((score: number) => void)[]
+  updateEliminate: ((num: number) => void)[]
+  updateNextBrick: ((brick: Brick|null) => void)[]
+  startGame: ((renderer: IRenderer) => void)[]
+  resetDom: (() => void)[]
+  gameOver: (() => void)[]
 }
 
 export interface IEventEmitter {
-  events: EmitterEvents
-  on: (event: OptionalKeys<EmitterEvents>, listener: Function) => void
-  emit: (event: OptionalKeys<EmitterEvents>) => void
-  off: (event: OptionalKeys<EmitterEvents>, listener: Function) => void
+  events: Partial<EmitterEvents>
+  on: <E extends keyof EmitterEvents>(
+    event: E,
+    listener: EmitterEvents[E][number]
+  ) => void
+  emit: <E extends keyof EmitterEvents>(
+    event: E,
+    ...args: Parameters<EmitterEvents[E][number]>
+  ) => void
+  off: <E extends keyof EmitterEvents>(
+    event: E,
+    listener: EmitterEvents[E][number]
+  ) => void
   clearAllListeners: () => void
 }

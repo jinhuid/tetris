@@ -1,25 +1,19 @@
 import CanvasWithMapCtx from "./canvasWithMapCtx"
 import { gameParam } from "./gameConfig"
 import Renderer from "./renderer"
-import { Scorer, scorer } from "./scorer"
-import { ICanvasWithMapCtx, IGame, IRenderer } from "./types"
+import { IGame, IRenderer } from "./types"
+import { EventEmitter, eventEmitter } from "./ui/eventEmitter"
 import { customRaf } from "./utils"
 
 export default class Game implements IGame {
-  private canvasWithMapCtx: ICanvasWithMapCtx
   private renderer: IRenderer
-  private Scorer: Scorer
-  private startWithEnd: readonly [IGame["startGame"], IGame["cancelGame"]]
+  private eventEmitter: EventEmitter = eventEmitter
+  private startWithEnd!: readonly [IGame["startGame"], IGame["cancelGame"]]
+  private startRaf!: () => void
+  private cancelRaf!: () => void
   constructor() {
-    this.canvasWithMapCtx = new CanvasWithMapCtx()
-    this.Scorer = scorer
-    this.renderer = new Renderer(this.canvasWithMapCtx)
-    this.startWithEnd = customRaf((time: number = performance.now()) => {
-      this.renderer.render(time)
-    }, gameParam.FPS)
-  }
-  get score() {
-    return this.Scorer.score
+    this.renderer = new Renderer()
+    this.defineRaf(this.renderer)
   }
   get over() {
     return this.renderer.over
@@ -27,17 +21,26 @@ export default class Game implements IGame {
   get pause() {
     return this.renderer.pause
   }
+  private defineRaf(renderer: IRenderer) {
+    this.startWithEnd = customRaf((time: number = performance.now()) => {
+      renderer.render(time)
+    }, gameParam.FPS)
+    this.startRaf = this.startWithEnd[0]
+    this.cancelRaf = this.startWithEnd[1]
+  }
   startGame() {
-    this.startWithEnd[0]()
+    this.startRaf()
+    this.eventEmitter.emit("startGame", this.renderer)
   }
   cancelGame() {
-    this.startWithEnd[1]()
+    this.cancelRaf()
   }
   restartGame() {
-    this.canvasWithMapCtx.cleanUpCanvas()
-    this.canvasWithMapCtx = new CanvasWithMapCtx()
-    this.Scorer.reset()
-    this.renderer = new Renderer(this.canvasWithMapCtx)
+    this.cancelRaf()
+    this.renderer = new Renderer()
+    this.eventEmitter.emit("startGame", this.renderer)
+    this.defineRaf(this.renderer)
+    this.startRaf()
   }
   playGame() {
     this.renderer.playGame()

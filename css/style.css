@@ -41,7 +41,7 @@ button,.score,.eliminate{
   cursor: pointer;
   transition: background-color 0.3s;
 }
-.start{
+.start,.restart{
   position: absolute;
   top: 50%;
   left: 50%;
@@ -85,6 +85,7 @@ button,.score,.eliminate{
 
 .restart{
   display: none;
+  background-color: rgb(89, 140, 201);
 }
 .pause{
   display: none;

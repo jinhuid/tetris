@@ -12,6 +12,6 @@ export type Binary<
   Arr extends string[] = []
 > = Arr["length"] extends T ? R : Binary<T, `${R}${"0" | "1"}`, [...Arr, ""]>
 
-export type OptionalKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? K : never
-}[keyof T]
+// export type OptionalKeys<T> = {
+//   [K in keyof T]-?: {} extends Pick<T, K> ? K : never
+// }[keyof T]
