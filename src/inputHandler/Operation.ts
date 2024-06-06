@@ -38,7 +38,7 @@ export default class Operation implements OperateEvents {
     this.brick.rotate(this.canvasWithMapCtx.mapBinary)
   }
   pauseGame() {
-    if (this.renderer.gameState.playing) {
+    if (this.renderer.gameState.pause) {
       this.Player.playGame()
     } else {
       this.Player.pauseGame()

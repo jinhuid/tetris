@@ -1,7 +1,4 @@
 import { GameParam } from "./types"
-// import { $ } from "./utils"
-// const container = $(".game") as HTMLDivElement
-// const { width, height } = container.getBoundingClientRect()
 
 let width: number
 let height: number
@@ -20,7 +17,6 @@ export const gameParam: GameParam = {
   devicePixelRatio: window.devicePixelRatio,
   // 给方块计算出整数值宽高，不然小数情况可能会出现方块间的间隙
   get brickWidth() {
-    console.log(height,'height');
     return Math.round((width * this.devicePixelRatio) / this.column)
   },
   get brickHeight() {

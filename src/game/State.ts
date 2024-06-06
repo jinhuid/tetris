@@ -1,7 +1,8 @@
 import { shallowReactive } from "vue"
 import { Brick } from "../brick"
-import { IGameState } from "../types"
+import { IGameRenderer, IGameState } from "../types"
 import { SinglePattern } from "../utils"
+import { gameHelper } from "./Helper"
 
 class State implements IGameState {
   private _nextBrick!: Brick | null
@@ -39,8 +40,11 @@ class State implements IGameState {
   get playing() {
     return this._playing
   }
-  setNextBrick(brick: Brick | null) {
+  setNextBrick(brick: Brick | null, renderer: IGameRenderer) {
     this._nextBrick = brick
+    if (brick) {
+      gameHelper.drawNextBrick(renderer.canvasWithMapCtx.nextBrickCtx, brick)
+    }
   }
   setOver() {
     this.setPlaying(false)
@@ -50,13 +54,13 @@ class State implements IGameState {
     this._pause = pause
   }
   setScore(score: number) {
-    this._score += score
+    this._score = score
   }
   setPlaying(playing: boolean) {
     this._playing = playing
   }
   setEliminateNum(num: number) {
-    this._eliminateNum += num
+    this._eliminateNum = num
   }
 }
 

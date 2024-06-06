@@ -15,7 +15,7 @@ export default class Game implements IGame {
     this._state = gameState
     this.defineRaf(this.renderer)
   }
-  
+
   get state() {
     return this._state
   }
@@ -29,6 +29,7 @@ export default class Game implements IGame {
   startGame() {
     this.startRaf()
     this.state.setPlaying(true)
+    this.state.setNextBrick(this.renderer.nextBrick, this.renderer)
   }
   cancelGame() {
     this.cancelRaf()
@@ -36,10 +37,11 @@ export default class Game implements IGame {
   restartGame() {
     this.cancelRaf()
     this.state.initState()
-    this.state.setPlaying(true)
     this.renderer = new Renderer()
     this.defineRaf(this.renderer)
     this.startRaf()
+    this.state.setPlaying(true)
+    this.state.setNextBrick(this.renderer.nextBrick, this.renderer)
   }
   playGame() {
     this.renderer.playGame()
@@ -47,7 +49,7 @@ export default class Game implements IGame {
   pauseGame() {
     this.renderer.pauseGame()
   }
-  togglePause(){
+  togglePause() {
     this.renderer.togglePause()
   }
 }

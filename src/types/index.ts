@@ -25,8 +25,9 @@ export type OperateEvents = {
 }
 
 export interface ICanvasWithMapCtx {
-  ctx: CanvasRenderingContext2D
+  brickCtx: CanvasRenderingContext2D
   bgCtx: CanvasRenderingContext2D
+  nextBrickCtx: CanvasRenderingContext2D
   mapBinary: number[]
   bg: (BrickColor | undefined)[][]
 }
@@ -39,6 +40,7 @@ export interface PlayWithPause {
 
 export interface IGameRenderer extends PlayWithPause {
   gameState: IGameState
+  canvasWithMapCtx: ICanvasWithMapCtx
   brick: Brick
   nextBrick: Brick
   render: (time: number) => void
@@ -59,7 +61,7 @@ export interface IGameState {
   playing: boolean
   eliminateNum: number
   initState: () => void
-  setNextBrick: (brick: Brick | null) => void
+  setNextBrick: (brick: Brick | null, renderer: IGameRenderer) => void
   setOver: () => void
   setPause: (pause: boolean) => void
   setScore: (score: number) => void

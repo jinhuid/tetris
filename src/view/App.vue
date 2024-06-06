@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <canvas class="next_brick"></canvas>
+    <canvas class="next_brick" ref="nextBrickRef"></canvas>
     <div class="score">
       得分：<br /><span>{{ game?.state.score }}</span>
     </div>
@@ -27,18 +27,19 @@
         @click="game?.restartGame">
         重新开始
       </button>
-      <canvas class="brick canvas" ref="canvasRef"></canvas>
-      <canvas class="bg canvas" ref="bgCanvasRed"></canvas>
+      <canvas class="brick canvas" ref="brickRef"></canvas>
+      <canvas class="bg canvas" ref="bgRef"></canvas>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
-import { IGame } from "../types";
+import { IGame } from "../types"
 const gameRef = ref<HTMLDivElement>()
-const canvasRef = ref<HTMLCanvasElement>()
-const bgCanvasRed = ref<HTMLCanvasElement>()
+const brickRef = ref<HTMLCanvasElement>()
+const bgRef = ref<HTMLCanvasElement>()
+const nextBrickRef = ref<HTMLCanvasElement>()
 
 let game = ref<IGame>()
 onMounted(async () => {
@@ -47,7 +48,11 @@ onMounted(async () => {
   initConfig(width, height)
   const CanvasWithMapCtx = (await import("../game/CanvasWithMapCtx")).default
   const Game = (await import("../game")).default
-  CanvasWithMapCtx.initContext(canvasRef.value!, bgCanvasRed.value!)
+  CanvasWithMapCtx.initContext(
+    brickRef.value!,
+    bgRef.value!,
+    nextBrickRef.value!
+  )
   game.value = new Game()
 })
 </script>

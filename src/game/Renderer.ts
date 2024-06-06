@@ -7,7 +7,7 @@ import Operation from "../inputHandler/Operation"
 import { ICanvasWithMapCtx, IGameState, IGameRenderer } from "../types"
 
 export default class Renderer implements IGameRenderer {
-  private canvasWithMapCtx: ICanvasWithMapCtx
+  public _canvasWithMapCtx: ICanvasWithMapCtx
   private operation: Operation
   private gameHelper: GameHelper
   private lastTime = 0
@@ -18,18 +18,20 @@ export default class Renderer implements IGameRenderer {
   private over: boolean = false
   private pause: boolean = false
   constructor() {
-    this.canvasWithMapCtx = new CanvasWithMapCtx()
+    this._canvasWithMapCtx = new CanvasWithMapCtx()
     this.gameHelper = gameHelper
     this._gameState = gameState
     this._brick = new Brick(this.gameHelper.getRandomLetter())
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
-    this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
+    this.operation = new Operation(this, this._canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
       togglePause: this.togglePause.bind(this),
     })
   }
-
+  get canvasWithMapCtx() {
+    return this._canvasWithMapCtx
+  }
   get gameState() {
     return this._gameState
   }
@@ -48,7 +50,7 @@ export default class Renderer implements IGameRenderer {
     if (this.over) {
       return
     }
-    this.clearCanvas(this.canvasWithMapCtx.ctx)
+    this.clearCanvas(this._canvasWithMapCtx.brickCtx)
     this.lastTime = time
     this.draw()
     this.update(time - this.pauseTime)
@@ -58,12 +60,12 @@ export default class Renderer implements IGameRenderer {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
   private draw() {
-    this.operation.brick.draw(this.canvasWithMapCtx.ctx)
+    this.operation.brick.draw(this._canvasWithMapCtx.brickCtx)
   }
   private update(time: number) {
     const shouldNextOne = this.operation.brick.update(
       time,
-      this.canvasWithMapCtx.mapBinary
+      this._canvasWithMapCtx.mapBinary
     )
     if (shouldNextOne) {
       this.operation.brick.isRecycle = true
@@ -79,8 +81,8 @@ export default class Renderer implements IGameRenderer {
    */
   private replaceNextOne(time: number) {
     const isSuccess = this.gameHelper.record(
-      this.canvasWithMapCtx.mapBinary,
-      this.canvasWithMapCtx.bg,
+      this._canvasWithMapCtx.mapBinary,
+      this._canvasWithMapCtx.bg,
       this.brick
     )
     if (!isSuccess) {
@@ -89,17 +91,17 @@ export default class Renderer implements IGameRenderer {
       return
     }
     const eliminateNum = this.gameHelper.eliminate(
-      this.canvasWithMapCtx.mapBinary,
-      this.canvasWithMapCtx.bg,
+      this._canvasWithMapCtx.mapBinary,
+      this._canvasWithMapCtx.bg,
       this.brick.y,
       Math.min(
         this.brick.y + this.brick.structure.length,
-        this.canvasWithMapCtx.mapBinary.length
+        this._canvasWithMapCtx.mapBinary.length
       )
     )
     this.gameHelper.drawBg(
-      this.canvasWithMapCtx.bgCtx,
-      this.canvasWithMapCtx.bg,
+      this._canvasWithMapCtx.bgCtx,
+      this._canvasWithMapCtx.bg,
       Brick.width,
       Brick.height
     )
@@ -108,9 +110,9 @@ export default class Renderer implements IGameRenderer {
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
     this.brick.correctLastTime(time)
     this.operation.takeTurns(this.brick)
-    this.gameState.setNextBrick(this.nextBrick)
-    this.gameState.setScore(score)
-    this.gameState.setEliminateNum(eliminateNum)
+    this.gameState.setNextBrick(this.nextBrick, this)
+    this.gameState.setScore(score + this.gameState.score)
+    this.gameState.setEliminateNum(eliminateNum + this.gameState.eliminateNum)
   }
   private cachePauseTime(time: number) {
     this.pauseTime += time - this.lastTime

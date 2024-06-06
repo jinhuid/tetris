@@ -1,4 +1,5 @@
 import { bricks } from "../brick/brickConfig"
+import { drawBrick } from "../draw"
 import { drawBrickPiece } from "../draw/drawBrickPiece"
 import { gameParam } from "../gameConfig"
 import { ICanvasWithMapCtx } from "../types"
@@ -6,7 +7,7 @@ import { BrickLetter, IBrick } from "../types/brick"
 import { SinglePattern } from "../utils"
 
 class Helper {
-  private eliminateTheLine = 2 ** gameParam.column - 1
+  private eliminateTarget = 2 ** gameParam.column - 1
   getRandomLetter(): BrickLetter {
     const letters = Object.keys(bricks) as BrickLetter[]
     return letters[(Math.random() * letters.length) >> 0]
@@ -47,7 +48,7 @@ class Helper {
   ) {
     let count = 0
     while (from < to) {
-      if (mapBinary[from] === this.eliminateTheLine) {
+      if (mapBinary[from] === this.eliminateTarget) {
         mapBinary.splice(from, 1)
         mapBinary.unshift(0)
         bg.splice(from, 1)
@@ -86,6 +87,10 @@ class Helper {
         } as IBrick)
       }
     }
+  }
+  drawNextBrick(ctx: CanvasRenderingContext2D, brick: IBrick) {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+    drawBrick(ctx, { ...brick, x: 0, y: 0 } as IBrick)
   }
   computeScore(row: number) {
     switch (row) {
