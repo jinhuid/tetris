@@ -1,11 +1,11 @@
-import { bricks } from "./brick/brickConfig"
-import { drawBrickPiece } from "./draw/drawBrickPiece"
-import { gameParam } from "./gameConfig"
-import { ICanvasWithMapCtx } from "./types"
-import { BrickLetter, IBrick } from "./types/brick"
-import { SinglePattern } from "./utils"
+import { bricks } from "../brick/brickConfig"
+import { drawBrickPiece } from "../draw/drawBrickPiece"
+import { gameParam } from "../gameConfig"
+import { ICanvasWithMapCtx } from "../types"
+import { BrickLetter, IBrick } from "../types/brick"
+import { SinglePattern } from "../utils"
 
-class GameHelper {
+class Helper {
   private eliminateTheLine = 2 ** gameParam.column - 1
   getRandomLetter(): BrickLetter {
     const letters = Object.keys(bricks) as BrickLetter[]
@@ -70,8 +70,8 @@ class GameHelper {
   drawBg(
     ctx: CanvasRenderingContext2D,
     colors: ICanvasWithMapCtx["bg"],
-    brickWidth: number = gameParam.brickWidth,
-    brickHeight: number = gameParam.brickHeight
+    brickWidth: number,
+    brickHeight: number
   ) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     for (let i = 0; i < colors.length; i++) {
@@ -105,8 +105,8 @@ class GameHelper {
   }
 }
 
-const SingleGameHelper = SinglePattern(GameHelper)
+const SingleGameHelper = SinglePattern(Helper)
 const gameHelper = new SingleGameHelper()
 
 export { gameHelper }
-export type { GameHelper }
+export type { Helper as GameHelper }

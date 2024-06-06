@@ -1,35 +1,37 @@
-import { Brick } from "./brick"
-import CanvasWithMapCtx from "./canvasWithMapCtx"
-import { GameHelper, gameHelper } from "./gameHelper"
-import { userActions } from "./inputHandler"
-import Operation from "./operate"
-import { Scorer } from "./scorer"
-import { ICanvasWithMapCtx, IRenderer } from "./types"
-import { EventEmitter, eventEmitter } from "./ui/eventEmitter"
+import { Brick } from "../brick"
+import CanvasWithMapCtx from "./CanvasWithMapCtx"
+import { GameHelper, gameHelper } from "./Helper"
+import gameState from "./State"
+import { userActions } from "../inputHandler"
+import Operation from "../inputHandler/Operation"
+import { ICanvasWithMapCtx, IGameState, IGameRenderer } from "../types"
 
-export default class Renderer implements IRenderer {
+export default class Renderer implements IGameRenderer {
   private canvasWithMapCtx: ICanvasWithMapCtx
   private operation: Operation
-  private scorer: Scorer
-  private eventEmitter: EventEmitter
   private gameHelper: GameHelper
   private lastTime = 0
   private pauseTime = 0
+  private _gameState: IGameState
   private _brick: Brick
   private _nextBrick: Brick
-  private _over: boolean = false
-  private _pause: boolean = false
+  private over: boolean = false
+  private pause: boolean = false
   constructor() {
-    this.canvasWithMapCtx =new CanvasWithMapCtx()
-    this.scorer = new Scorer()
-    this.eventEmitter = eventEmitter
+    this.canvasWithMapCtx = new CanvasWithMapCtx()
     this.gameHelper = gameHelper
+    this._gameState = gameState
     this._brick = new Brick(this.gameHelper.getRandomLetter())
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
     this.operation = new Operation(this, this.canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
+      togglePause: this.togglePause.bind(this),
     })
+  }
+
+  get gameState() {
+    return this._gameState
   }
   get brick() {
     return this._brick
@@ -37,23 +39,20 @@ export default class Renderer implements IRenderer {
   get nextBrick() {
     return this._nextBrick
   }
-  get over() {
-    return this._over
-  }
-  get pause() {
-    return this._pause
-  }
   render(time: number) {
     this.userActions()
-    if (this._pause) {
+    if (this.pause) {
       this.cachePauseTime(time)
+      return
+    }
+    if (this.over) {
       return
     }
     this.clearCanvas(this.canvasWithMapCtx.ctx)
     this.lastTime = time
     this.draw()
     this.update(time - this.pauseTime)
-    this.canNextOne(time - this.pauseTime)
+    this.checkBrickState(time - this.pauseTime)
   }
   private clearCanvas(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
@@ -70,23 +69,26 @@ export default class Renderer implements IRenderer {
       this.operation.brick.isRecycle = true
     }
   }
-  private canNextOne(time: number) {
+  private checkBrickState(time: number) {
     if (this.operation.brick.isRecycle) {
-      this.newNextOne(time)
+      this.replaceNextOne(time)
     }
   }
-  private newNextOne(time: number) {
+  /**
+   * @dec 先检查是否能记录下来，然后消除行，计算得分，更新游戏状态,最后替换下一个方块
+   */
+  private replaceNextOne(time: number) {
     const isSuccess = this.gameHelper.record(
       this.canvasWithMapCtx.mapBinary,
       this.canvasWithMapCtx.bg,
       this.brick
     )
     if (!isSuccess) {
-      this._over = true
-      this.eventEmitter.emit("gameOver")
+      this.over = true
+      this.gameState.setOver()
       return
     }
-    const row = this.gameHelper.eliminate(
+    const eliminateNum = this.gameHelper.eliminate(
       this.canvasWithMapCtx.mapBinary,
       this.canvasWithMapCtx.bg,
       this.brick.y,
@@ -97,30 +99,36 @@ export default class Renderer implements IRenderer {
     )
     this.gameHelper.drawBg(
       this.canvasWithMapCtx.bgCtx,
-      this.canvasWithMapCtx.bg
+      this.canvasWithMapCtx.bg,
+      Brick.width,
+      Brick.height
     )
-    const score = this.gameHelper.computeScore(row)
-    this.scorer.scoreIncrease(score)
-    this.scorer.eliminateNumIncrease(row)
+    const score = this.gameHelper.computeScore(eliminateNum)
     this._brick = this.nextBrick
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
     this.brick.correctLastTime(time)
     this.operation.takeTurns(this.brick)
-    this.eventEmitter.emit("updateScore", this.scorer.score)
-    this.eventEmitter.emit("updateEliminate", this.scorer.eliminateNum)
-    this.eventEmitter.emit("updateNextBrick", this.nextBrick)
+    this.gameState.setNextBrick(this.nextBrick)
+    this.gameState.setScore(score)
+    this.gameState.setEliminateNum(eliminateNum)
   }
   private cachePauseTime(time: number) {
     this.pauseTime += time - this.lastTime
     this.lastTime = time
   }
   playGame() {
-    this._pause = false
+    this.gameState.setPause(false)
+    this.pause = false
   }
   pauseGame() {
-    this._pause = true
+    this.gameState.setPause(true)
+    this.pause = true
+  }
+  togglePause() {
+    this.gameState.setPause(!this.gameState.pause)
+    this.pause = !this.pause
   }
   private userActions() {
-    userActions(this._pause, this.operation)
+    userActions(this.pause, this.over, this.operation)
   }
 }

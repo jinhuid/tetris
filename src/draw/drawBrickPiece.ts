@@ -4,9 +4,13 @@ import { drawStyle } from "./brickStyle"
 
 const offsetCanvas = document.createElement("canvas")
 const offsetCtx = offsetCanvas.getContext("2d")!
-//最多缓存20个砖块
+queueMicrotask(() => {
+  //最多缓存20个砖块
+  // 为了防止模块同步加载时 而gameParam.brickWidth还未初始化 所以放置异步任务
+  
+})
 offsetCanvas.height = gameParam.brickHeight * 20
-offsetCanvas.width = gameParam.brickWidth
+  offsetCanvas.width = gameParam.brickWidth
 let index = 0
 const cache: Record<string, number> = {}
 

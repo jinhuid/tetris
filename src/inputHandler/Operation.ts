@@ -1,14 +1,14 @@
 import {
   ICanvasWithMapCtx,
-  IRenderer,
+  IGameRenderer,
   OperateEvents,
   PlayWithPause,
-} from "./types"
-import { IBrick } from "./types/brick"
+} from "../types"
+import { IBrick } from "../types/brick"
 
 export default class Operation implements OperateEvents {
   constructor(
-    private renderer: IRenderer,
+    private renderer: IGameRenderer,
     private canvasWithMapCtx: ICanvasWithMapCtx,
     public brick: IBrick,
     private Player: PlayWithPause
@@ -38,7 +38,7 @@ export default class Operation implements OperateEvents {
     this.brick.rotate(this.canvasWithMapCtx.mapBinary)
   }
   pauseGame() {
-    if (this.renderer.pause) {
+    if (this.renderer.gameState.playing) {
       this.Player.playGame()
     } else {
       this.Player.pauseGame()

@@ -34,49 +34,35 @@ export interface ICanvasWithMapCtx {
 export interface PlayWithPause {
   playGame: () => void
   pauseGame: () => void
+  togglePause: () => void
 }
 
-export interface IRenderer extends PlayWithPause {
+export interface IGameRenderer extends PlayWithPause {
+  gameState: IGameState
   brick: Brick
   nextBrick: Brick
-  over: boolean
-  pause: boolean
   render: (time: number) => void
 }
 
 export interface IGame extends PlayWithPause {
-  over: boolean
-  pause: boolean
+  state: IGameState
   startGame: () => void
   restartGame: () => void
   cancelGame: () => void
 }
 
-// const fnArr: ((a: 1) => void)[] | ((b: 2) => void)[] = []
-// fnArr.push(() => {})
-
-export interface EmitterEvents {
-  updateScore: ((score: number) => void)[]
-  updateEliminate: ((num: number) => void)[]
-  updateNextBrick: ((brick: Brick|null) => void)[]
-  startGame: ((renderer: IRenderer) => void)[]
-  resetDom: (() => void)[]
-  gameOver: (() => void)[]
-}
-
-export interface IEventEmitter {
-  events: Partial<EmitterEvents>
-  on: <E extends keyof EmitterEvents>(
-    event: E,
-    listener: EmitterEvents[E][number]
-  ) => void
-  emit: <E extends keyof EmitterEvents>(
-    event: E,
-    ...args: Parameters<EmitterEvents[E][number]>
-  ) => void
-  off: <E extends keyof EmitterEvents>(
-    event: E,
-    listener: EmitterEvents[E][number]
-  ) => void
-  clearAllListeners: () => void
+export interface IGameState {
+  nextBrick: Brick | null
+  over: boolean
+  pause: boolean
+  score: number
+  playing: boolean
+  eliminateNum: number
+  initState: () => void
+  setNextBrick: (brick: Brick | null) => void
+  setOver: () => void
+  setPause: (pause: boolean) => void
+  setScore: (score: number) => void
+  setPlaying: (playing: boolean) => void
+  setEliminateNum: (num: number) => void
 }

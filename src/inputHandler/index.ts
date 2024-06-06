@@ -88,8 +88,13 @@ const isPauseKey = (
 }
 
 let lastTime = 0
-export const userActions = function (pause: boolean, operation: OperateEvents) {
+export const userActions = function (
+  pause: boolean,
+  over: boolean,
+  operation: OperateEvents
+) {
   if (activeKey === null) return
+  if (over) return
   if (isPauseKey(activeKey)) {
     operation.pauseGame()
     activeKey = null

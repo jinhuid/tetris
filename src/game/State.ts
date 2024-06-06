@@ -1,0 +1,65 @@
+import { shallowReactive } from "vue"
+import { Brick } from "../brick"
+import { IGameState } from "../types"
+import { SinglePattern } from "../utils"
+
+class State implements IGameState {
+  private _nextBrick!: Brick | null
+  private _over!: boolean
+  private _pause!: boolean
+  private _score!: number
+  private _eliminateNum!: number
+  private _playing!: boolean
+  constructor() {
+    this.initState()
+  }
+  public initState() {
+    this._nextBrick = null
+    this._over = false
+    this._pause = false
+    this._score = 0
+    this._eliminateNum = 0
+    this._playing = false
+  }
+  get nextBrick() {
+    return this._nextBrick
+  }
+  get over() {
+    return this._over
+  }
+  get pause() {
+    return this._pause
+  }
+  get score() {
+    return this._score
+  }
+  get eliminateNum() {
+    return this._eliminateNum
+  }
+  get playing() {
+    return this._playing
+  }
+  setNextBrick(brick: Brick | null) {
+    this._nextBrick = brick
+  }
+  setOver() {
+    this.setPlaying(false)
+    this._over = true
+  }
+  setPause(pause: boolean) {
+    this._pause = pause
+  }
+  setScore(score: number) {
+    this._score += score
+  }
+  setPlaying(playing: boolean) {
+    this._playing = playing
+  }
+  setEliminateNum(num: number) {
+    this._eliminateNum += num
+  }
+}
+
+const SingleGameState = SinglePattern(State)
+const gameState = shallowReactive(new SingleGameState())
+export default gameState

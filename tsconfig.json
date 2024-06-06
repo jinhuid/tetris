@@ -5,6 +5,7 @@
     "noImplicitAny": true,
     "target": "ESNext",
     "lib": ["esnext", "dom"],
+    "module": "ESNext",
     "moduleResolution": "node",
     "noEmitOnError": true,
     "noUnusedLocals": true,
