@@ -1,29 +1,28 @@
 import { Brick } from "../brick"
 import CanvasWithMapCtx from "./CanvasWithMapCtx"
 import { GameHelper, gameHelper } from "./Helper"
-import gameState from "./State"
 import { userActions } from "../inputHandler"
 import Operation from "../inputHandler/Operation"
-import { ICanvasWithMapCtx, IGameState, IGameRenderer } from "../types"
+import { ICanvasWithMapCtx, IGameRenderer, IGame } from "../types"
 
 export default class Renderer implements IGameRenderer {
-  public _canvasWithMapCtx: ICanvasWithMapCtx
   private operation: Operation
   private gameHelper: GameHelper
   private lastTime = 0
   private pauseTime = 0
-  private _gameState: IGameState
+  private game: IGame
   private _brick: Brick
   private _nextBrick: Brick
   private over: boolean = false
   private pause: boolean = false
-  constructor() {
+  _canvasWithMapCtx: ICanvasWithMapCtx
+  constructor(game: IGame) {
     this._canvasWithMapCtx = new CanvasWithMapCtx()
     this.gameHelper = gameHelper
-    this._gameState = gameState
+    this.game = game
     this._brick = new Brick(this.gameHelper.getRandomLetter())
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
-    this.operation = new Operation(this, this._canvasWithMapCtx, this.brick, {
+    this.operation = new Operation(this.game, this._canvasWithMapCtx, this.brick, {
       playGame: this.playGame.bind(this),
       pauseGame: this.pauseGame.bind(this),
       togglePause: this.togglePause.bind(this),
@@ -31,9 +30,6 @@ export default class Renderer implements IGameRenderer {
   }
   get canvasWithMapCtx() {
     return this._canvasWithMapCtx
-  }
-  get gameState() {
-    return this._gameState
   }
   get brick() {
     return this._brick
@@ -87,7 +83,7 @@ export default class Renderer implements IGameRenderer {
     )
     if (!isSuccess) {
       this.over = true
-      this.gameState.setOver()
+      this.game.state.setOver()
       return
     }
     const eliminateNum = this.gameHelper.eliminate(
@@ -112,24 +108,24 @@ export default class Renderer implements IGameRenderer {
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
     this.brick.correctLastTime(time)
     this.operation.takeTurns(this.brick)
-    this.gameState.setNextBrick(this.nextBrick, this)
-    this.gameState.setScore(score + this.gameState.score)
-    this.gameState.setEliminateNum(eliminateNum + this.gameState.eliminateNum)
+    this.game.state.setNextBrick(this.nextBrick, this)
+    this.game.state.setScore(score + this.game.state.score)
+    this.game.state.setEliminateNum(eliminateNum + this.game.state.eliminateNum)
   }
   private cachePauseTime(time: number) {
     this.pauseTime += time - this.lastTime
     this.lastTime = time
   }
   playGame() {
-    this.gameState.setPause(false)
+    this.game.state.setPause(false)
     this.pause = false
   }
   pauseGame() {
-    this.gameState.setPause(true)
+    this.game.state.setPause(true)
     this.pause = true
   }
   togglePause() {
-    this.gameState.setPause(!this.gameState.pause)
+    this.game.state.setPause(!this.game.state.pause)
     this.pause = !this.pause
   }
   private userActions() {

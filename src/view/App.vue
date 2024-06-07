@@ -16,28 +16,41 @@
         @click="game?.restartGame">
         重新开始
       </button>
+      <div
+        class="toast absolute toast-center toast-middle z-10"
+        v-show="game?.state.pause">
+        <div class="alert alert-info">
+          <span>游戏已暂停</span>
+          <span class="loading loading-ring loading-sm"></span>
+        </div>
+      </div>
       <canvas class="absolute h-full w-full" ref="brickRef"></canvas>
       <canvas class="absolute h-full w-full" ref="bgRef"></canvas>
     </div>
     <div class="flex flex-col w-min rounded-md ml-4 mr-4">
-      <canvas class="size-20 bg-[#e8e2d58c] rounded-md mb-2 mt-2" ref="nextBrickRef"></canvas>
+      <canvas
+        class="size-20 bg-[#e8e2d58c] rounded-md mb-4 mt-4"
+        ref="nextBrickRef"></canvas>
       <div class="stats stats-vertical shadow w-20">
-        <div class="stat p-0 pt-3">
+        <div class="stat p-0 pt-3 pb-3">
           <div class="stat-title text-center">得分:</div>
           <div class="stat-value text-center text-base">
-            {{ game?.state.score }}
+            {{ game?.state.score || 0 }}
           </div>
         </div>
-        <div class="stat p-0 pt-3">
+        <div class="stat p-0 pt-3 pb-3">
           <div class="stat-title text-center">消除行：</div>
           <div class="stat-value text-center text-base">
-            {{ game?.state.eliminateNum }}
+            {{ game?.state.eliminateNum || 0 }}
           </div>
         </div>
       </div>
       <div
         class="stats stats-vertical w-25 mt-20 bg-transparent overflow-hidden">
-        <button class="btn bg-[rgb(255,255,255)]" @click="game?.restartGame">
+        <button
+          v-show="game?.state.playing"
+          class="btn bg-[rgb(255,255,255)]"
+          @click="game?.restartGame">
           重新游戏
         </button>
         <button

@@ -15,14 +15,14 @@ const getY = (structure: BinaryString<BrickStruct>) => {
   return -index - 1
 }
 export class Brick implements IBrick {
-  public static readonly height = gameParam.brickHeight
-  public static readonly width = gameParam.brickWidth
+  static readonly height = gameParam.brickHeight
+  static readonly width = gameParam.brickWidth
   readonly color: BrickColor
   readonly width: number
   readonly height: number
-  public structure: BinaryString<BrickStruct>
-  public x: number
-  public y: number
+  structure: BinaryString<BrickStruct>
+  x: number
+  y: number
   isRecycle = false
   constructor(
     public letter: keyof Bricks,

@@ -11,7 +11,7 @@ export default class Game implements IGame {
   private startRaf!: () => void
   private cancelRaf!: () => void
   constructor() {
-    this.renderer = new Renderer()
+    this.renderer = new Renderer(this)
     this._state = gameState
     this.defineRaf(this.renderer)
   }
@@ -37,7 +37,7 @@ export default class Game implements IGame {
   restartGame() {
     this.cancelRaf()
     this.state.initState()
-    this.renderer = new Renderer()
+    this.renderer = new Renderer(this)
     this.defineRaf(this.renderer)
     this.startRaf()
     this.state.setPlaying(true)
