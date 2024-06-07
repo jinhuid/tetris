@@ -2,7 +2,8 @@
   "description": "",
   "scripts": {
     "dev": "vite",
-    "prod": "vite build --minify=false --base=./ --outDir=docs",
+    "prod": "vite build --base=./ --outDir=docs",
+    "prod-noMinify": "vite build --minify=false --base=./ --outDir=docs",
     "typeCheck": "tsc --noEmit"
   },
   "dependencies": {
