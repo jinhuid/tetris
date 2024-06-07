@@ -99,12 +99,14 @@ export default class Renderer implements IGameRenderer {
         this._canvasWithMapCtx.mapBinary.length
       )
     )
+    console.time("drawBg")
     this.gameHelper.drawBg(
       this._canvasWithMapCtx.bgCtx,
       this._canvasWithMapCtx.bg,
       Brick.width,
       Brick.height
     )
+    console.timeEnd("drawBg")
     const score = this.gameHelper.computeScore(eliminateNum)
     this._brick = this.nextBrick
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)

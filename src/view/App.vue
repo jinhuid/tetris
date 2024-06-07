@@ -1,47 +1,65 @@
 <template>
-  <div class="container">
-    <canvas class="next_brick" ref="nextBrickRef"></canvas>
-    <div class="score">
-      得分：<br /><span>{{ game?.state.score }}</span>
-    </div>
-    <div class="eliminate">
-      消除行：<br /><span>{{ game?.state.eliminateNum }}</span>
-    </div>
-    <button class="regame" @click="game?.restartGame">重新游戏</button>
-    <button
-      class="pause"
-      v-show="game?.state.playing"
-      @click="game?.togglePause">
-      {{ game?.state.pause ? "继续" : "暂停" }}
-    </button>
-    <div class="game" ref="gameRef">
+  <div
+    class="m-auto relative flex flex-row w-min h-min bg-gradient-to-t from-[rgb(225,230,217)] to-[rgb(248,253,239)]">
+    <div
+      class="relative h-[80vh] aspect-[9/18] flex border-r-[3px] border-[rgb(186 187 188)] rounded-lg overflow-hidden"
+      ref="gameRef">
       <button
-        class="start"
-        v-show="!game?.state.playing"
+        class="btn btn-primary btn-lg m-auto z-10"
+        v-show="!game?.state.playing && !game?.state.over"
         @click="game?.startGame">
         开始
       </button>
       <button
-        class="restart"
+        class="btn btn-accent btn-lg m-auto z-10"
         v-show="game?.state.over"
         @click="game?.restartGame">
         重新开始
       </button>
-      <canvas class="brick canvas" ref="brickRef"></canvas>
-      <canvas class="bg canvas" ref="bgRef"></canvas>
+      <canvas class="absolute h-full w-full" ref="brickRef"></canvas>
+      <canvas class="absolute h-full w-full" ref="bgRef"></canvas>
+    </div>
+    <div class="flex flex-col w-min rounded-md ml-4 mr-4">
+      <canvas class="size-20 bg-[#e8e2d58c] rounded-md mb-2 mt-2" ref="nextBrickRef"></canvas>
+      <div class="stats stats-vertical shadow w-20">
+        <div class="stat p-0 pt-3">
+          <div class="stat-title text-center">得分:</div>
+          <div class="stat-value text-center text-base">
+            {{ game?.state.score }}
+          </div>
+        </div>
+        <div class="stat p-0 pt-3">
+          <div class="stat-title text-center">消除行：</div>
+          <div class="stat-value text-center text-base">
+            {{ game?.state.eliminateNum }}
+          </div>
+        </div>
+      </div>
+      <div
+        class="stats stats-vertical w-25 mt-20 bg-transparent overflow-hidden">
+        <button class="btn bg-[rgb(255,255,255)]" @click="game?.restartGame">
+          重新游戏
+        </button>
+        <button
+          class="btn bg-[rgb(255,255,255)]"
+          v-show="game?.state.playing"
+          @click="game?.togglePause">
+          {{ game?.state.pause ? "继续" : "暂停" }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { onMounted, ref, shallowRef } from "vue"
 import { IGame } from "../types"
 const gameRef = ref<HTMLDivElement>()
 const brickRef = ref<HTMLCanvasElement>()
 const bgRef = ref<HTMLCanvasElement>()
 const nextBrickRef = ref<HTMLCanvasElement>()
 
-let game = ref<IGame>()
+let game = shallowRef<IGame>()
 onMounted(async () => {
   const { initConfig } = await import("../gameConfig")
   const { width, height } = gameRef.value!.getBoundingClientRect()
@@ -54,105 +72,6 @@ onMounted(async () => {
     nextBrickRef.value!
   )
   game.value = new Game()
+  console.log(game)
 })
 </script>
-
-<style>
-* {
-  margin: 0px;
-  padding: 0px;
-}
-.canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  border-radius: 10px;
-}
-.bg {
-  z-index: -1;
-  background-color: rgb(226, 233, 175);
-}
-.game {
-  position: relative;
-  height: 80vh;
-  background-size: 100% 100%;
-  aspect-ratio: 9 / 18;
-  z-index: 99;
-  transform: scale(0.9);
-  border-radius: 10px;
-  border: 1px solid black;
-}
-.container {
-  position: relative;
-  margin: auto;
-  height: min-content;
-  width: 400px;
-  background-color: rgb(158, 173, 134);
-  /* z-index: ; */
-}
-button,
-.score,
-.eliminate {
-  padding: 8px 16px;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-.start,
-.restart {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  height: 50px;
-  width: 100px;
-  background-color: #328855;
-  transform: translate(-50%, -50%);
-  z-index: 99;
-}
-.start:hover {
-  background-color: #64c88a;
-}
-.next_brick {
-  position: absolute;
-  background-color: white;
-  border: 1px solid black;
-  top: 0;
-  right: 0;
-  transform-origin: right center;
-  transform: scale(0.4);
-}
-
-.score {
-  position: absolute;
-  background-color: brown;
-  top: 20%;
-  right: 0;
-}
-.eliminate {
-  position: absolute;
-  background-color: brown;
-  top: 30%;
-  right: 0;
-}
-.regame {
-  position: absolute;
-  background-color: brown;
-  top: 40%;
-  right: 0;
-}
-
-.restart {
-  background-color: rgb(89, 140, 201);
-}
-.pause {
-  position: absolute;
-  background-color: brown;
-  top: 50%;
-  right: 0;
-}
-</style>
