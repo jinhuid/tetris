@@ -1,7 +1,12 @@
 import { GameParam } from "./types"
-import { $ } from "./utils"
-const container = $(".game") as HTMLDivElement
-const { width, height } = container.getBoundingClientRect()
+
+let width: number
+let height: number
+
+export const initConfig = (w: number, h: number) => {
+  width = w
+  height = h
+}
 export const gameParam: GameParam = {
   column: 10,
   row: 20,
@@ -25,5 +30,3 @@ export const gameParam: GameParam = {
     return this.brickHeight * this.row
   },
 }
-
-

@@ -1,5 +1,7 @@
-import Ui from "./ui";
+import { createApp } from "vue"
+import App from "./view/App.vue"
+import "./style.css"
 
+const app = createApp(App)
 
-const ui = new Ui()
-console.log(ui);
+app.mount("#app")

@@ -25,8 +25,9 @@ export type OperateEvents = {
 }
 
 export interface ICanvasWithMapCtx {
-  ctx: CanvasRenderingContext2D
+  brickCtx: CanvasRenderingContext2D
   bgCtx: CanvasRenderingContext2D
+  nextBrickCtx: CanvasRenderingContext2D
   mapBinary: number[]
   bg: (BrickColor | undefined)[][]
 }
@@ -34,49 +35,36 @@ export interface ICanvasWithMapCtx {
 export interface PlayWithPause {
   playGame: () => void
   pauseGame: () => void
+  togglePause: () => void
 }
 
-export interface IRenderer extends PlayWithPause {
+export interface IGameRenderer extends PlayWithPause {
+  gameState: IGameState
+  canvasWithMapCtx: ICanvasWithMapCtx
   brick: Brick
   nextBrick: Brick
-  over: boolean
-  pause: boolean
   render: (time: number) => void
 }
 
 export interface IGame extends PlayWithPause {
-  over: boolean
-  pause: boolean
+  state: IGameState
   startGame: () => void
   restartGame: () => void
   cancelGame: () => void
 }
 
-// const fnArr: ((a: 1) => void)[] | ((b: 2) => void)[] = []
-// fnArr.push(() => {})
-
-export interface EmitterEvents {
-  updateScore: ((score: number) => void)[]
-  updateEliminate: ((num: number) => void)[]
-  updateNextBrick: ((brick: Brick|null) => void)[]
-  startGame: ((renderer: IRenderer) => void)[]
-  resetDom: (() => void)[]
-  gameOver: (() => void)[]
-}
-
-export interface IEventEmitter {
-  events: Partial<EmitterEvents>
-  on: <E extends keyof EmitterEvents>(
-    event: E,
-    listener: EmitterEvents[E][number]
-  ) => void
-  emit: <E extends keyof EmitterEvents>(
-    event: E,
-    ...args: Parameters<EmitterEvents[E][number]>
-  ) => void
-  off: <E extends keyof EmitterEvents>(
-    event: E,
-    listener: EmitterEvents[E][number]
-  ) => void
-  clearAllListeners: () => void
+export interface IGameState {
+  nextBrick: Brick | null
+  over: boolean
+  pause: boolean
+  score: number
+  playing: boolean
+  eliminateNum: number
+  initState: () => void
+  setNextBrick: (brick: Brick | null, renderer: IGameRenderer) => void
+  setOver: () => void
+  setPause: (pause: boolean) => void
+  setScore: (score: number) => void
+  setPlaying: (playing: boolean) => void
+  setEliminateNum: (num: number) => void
 }

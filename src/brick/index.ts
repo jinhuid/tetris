@@ -15,6 +15,8 @@ const getY = (structure: BinaryString<BrickStruct>) => {
   return -index - 1
 }
 export class Brick implements IBrick {
+  public static readonly height = gameParam.brickHeight
+  public static readonly width = gameParam.brickWidth
   readonly color: BrickColor
   readonly width: number
   readonly height: number
@@ -27,8 +29,8 @@ export class Brick implements IBrick {
     public lastTime: number = performance.now()
   ) {
     this.color = bricks[this.letter].color
-    this.width = gameParam.brickWidth
-    this.height = gameParam.brickHeight
+    this.width = Brick.width
+    this.height = Brick.height
     this.structure = bricks[this.letter].struct
     this.x = gameParam.column / 2 - 1
     this.y = getY(this.structure)
