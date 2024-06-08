@@ -14,7 +14,7 @@ class State implements IGameState {
   constructor() {
     this.initState()
   }
-  public initState() {
+  initState() {
     this._nextBrick = null
     this._over = false
     this._pause = false

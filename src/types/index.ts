@@ -12,7 +12,6 @@ export type GameParam = {
   readonly FPS: number | null
   speed: number
   keySpeed: number
-  score: number
 }
 
 export type OperateEvents = {
@@ -25,11 +24,11 @@ export type OperateEvents = {
 }
 
 export interface ICanvasWithMapCtx {
-  brickCtx: CanvasRenderingContext2D
-  bgCtx: CanvasRenderingContext2D
-  nextBrickCtx: CanvasRenderingContext2D
-  mapBinary: number[]
-  bg: (BrickColor | undefined)[][]
+  readonly brickCtx: CanvasRenderingContext2D
+  readonly bgCtx: CanvasRenderingContext2D
+  readonly nextBrickCtx: CanvasRenderingContext2D
+  readonly mapBinary: number[]
+  readonly bg: (BrickColor | undefined)[][]
 }
 
 export interface PlayWithPause {
@@ -39,27 +38,26 @@ export interface PlayWithPause {
 }
 
 export interface IGameRenderer extends PlayWithPause {
-  gameState: IGameState
-  canvasWithMapCtx: ICanvasWithMapCtx
-  brick: Brick
-  nextBrick: Brick
+  readonly canvasWithMapCtx: ICanvasWithMapCtx
+  readonly brick: Brick
+  readonly nextBrick: Brick
   render: (time: number) => void
 }
 
 export interface IGame extends PlayWithPause {
-  state: IGameState
+  readonly state: IGameState
   startGame: () => void
   restartGame: () => void
   cancelGame: () => void
 }
 
 export interface IGameState {
-  nextBrick: Brick | null
-  over: boolean
-  pause: boolean
-  score: number
-  playing: boolean
-  eliminateNum: number
+  readonly nextBrick: Brick | null
+  readonly over: boolean
+  readonly pause: boolean
+  readonly score: number
+  readonly playing: boolean
+  readonly eliminateNum: number
   initState: () => void
   setNextBrick: (brick: Brick | null, renderer: IGameRenderer) => void
   setOver: () => void

@@ -13,9 +13,8 @@ export const gameParam: GameParam = {
   FPS: null,
   speed: 2,
   keySpeed: 10,
-  score: 0,
   devicePixelRatio: window.devicePixelRatio,
-  // 给方块计算出整数值宽高，不然小数情况可能会出现方块间的间隙
+  // 给方块计算出整数值宽高，避免小数情况可能会出现方块间的间隙及渲染时小数造成的影响
   get brickWidth() {
     return Math.round((width * this.devicePixelRatio) / this.column)
   },

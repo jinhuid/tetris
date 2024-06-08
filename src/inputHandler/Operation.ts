@@ -1,6 +1,6 @@
 import {
   ICanvasWithMapCtx,
-  IGameRenderer,
+  IGame,
   OperateEvents,
   PlayWithPause,
 } from "../types"
@@ -8,7 +8,7 @@ import { IBrick } from "../types/brick"
 
 export default class Operation implements OperateEvents {
   constructor(
-    private renderer: IGameRenderer,
+    private game: IGame,
     private canvasWithMapCtx: ICanvasWithMapCtx,
     public brick: IBrick,
     private Player: PlayWithPause
@@ -29,7 +29,9 @@ export default class Operation implements OperateEvents {
     }
   }
   downToBottom() {
-    const shouldNextOne = this.brick.downToBottom(this.canvasWithMapCtx.mapBinary)
+    const shouldNextOne = this.brick.downToBottom(
+      this.canvasWithMapCtx.mapBinary
+    )
     if (shouldNextOne) {
       this.brick.isRecycle = true
     }
@@ -38,7 +40,7 @@ export default class Operation implements OperateEvents {
     this.brick.rotate(this.canvasWithMapCtx.mapBinary)
   }
   pauseGame() {
-    if (this.renderer.gameState.pause) {
+    if (this.game.state.pause) {
       this.Player.playGame()
     } else {
       this.Player.pauseGame()
