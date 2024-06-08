@@ -5,9 +5,10 @@ export const drawBrick = (
   ctx: CanvasRenderingContext2D,
   { x, y, width, height, color, structure }: IBrick
 ) => {
-  for (let i = 0; i < structure.length; i++) {
-    for (let j = 0; j < structure[i].length; j++) {
-      if (structure[i][j] == "0") continue
+  let i = 0,
+    j = 0
+  while (i < structure.length) {
+    if (structure[i] & (1 << (structure.length - 1 - j))) {
       drawBrickPiece(ctx, {
         x: (x + j) * width,
         y: (y + i) * height,
@@ -16,7 +17,10 @@ export const drawBrick = (
         color,
       } as IBrick)
     }
+    j++
+    if (j === structure.length) {
+      j = 0
+      i++
+    }
   }
 }
-
-

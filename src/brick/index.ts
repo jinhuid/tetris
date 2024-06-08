@@ -1,26 +1,27 @@
 import { drawBrick } from "../draw"
 import { gameParam } from "../gameConfig"
-import {
-  BinaryString,
-  BrickColor,
-  BrickStruct,
-  Bricks,
-  IBrick,
-} from "../types/brick"
+import { BrickColor, BrickStruct, Bricks, IBrick } from "../types/brick"
 import { bricks } from "./brickConfig"
 
-const getY = (structure: BinaryString<BrickStruct>) => {
-  const index = structure.findLastIndex((s) => +s !== 0)
+const getY = (structure: Readonly<number[]>) => {
+  const index = structure.findLastIndex((s) => s !== 0)
   if (index === -1) return -structure.length
   return -index - 1
 }
+
+const getStructureVal = (structure: BrickStruct): number[] => {
+  return structure.map((s) => parseInt(s, 2))
+}
+
+const eliminateTarget = 2 ** gameParam.column - 1
+
 export class Brick implements IBrick {
   static readonly height = gameParam.brickHeight
   static readonly width = gameParam.brickWidth
   readonly color: BrickColor
   readonly width: number
   readonly height: number
-  structure: BinaryString<BrickStruct>
+  structure: Readonly<number[]>
   x: number
   y: number
   isRecycle = false
@@ -31,7 +32,7 @@ export class Brick implements IBrick {
     this.color = bricks[this.letter].color
     this.width = Brick.width
     this.height = Brick.height
-    this.structure = bricks[this.letter].struct
+    this.structure = getStructureVal(bricks[this.letter].struct)
     this.x = gameParam.column / 2 - 1
     this.y = getY(this.structure)
   }
@@ -86,49 +87,42 @@ export class Brick implements IBrick {
     return true
   }
   rotate(mapBinary: number[]) {
-    const len = this.structure[0].length
-    let newStructure: string[][] | BinaryString<BrickStruct> = Array.from(
-      { length: len },
-      () => new Array(len)
-    )
-    for (let i = 0; i < this.structure.length; i++) {
-      for (let j = 0; j < this.structure[i].length; j++) {
-        let x = i,
-          y = len - 1 - j
+    const len = this.structure.length
+    const newStructure: number[] = new Array(len).fill(0)
+    let i = 0,
+      j = 0
+    while (i < len) {
+      if (this.structure[i] & (1 << (len - 1 - j))) {
+        const x = i
+        const y = len - 1 - j
+        //边界检测
         if (
-          this.structure[i][j] === "1" &&
-          (x + this.x >= gameParam.column ||
-            x + this.x < 0 ||
-            y + this.y >= gameParam.row)
-        )
+          x + this.x >= gameParam.column ||
+          x + this.x < 0 ||
+          y + this.y >= gameParam.row
+        ) {
           return
-        newStructure[y][x] = this.structure[i][j]
+        }
+        newStructure[y] += 1 << (len - 1 - x)
+      }
+      j++
+      if (j === len) {
+        i++
+        j = 0
       }
     }
-    newStructure = newStructure.map((s) =>
-      s.join("")
-    ) as unknown as BinaryString<BrickStruct>
     const newBinary = this.getBinary(newStructure)
     if (this.isOverlap(mapBinary, newBinary)) return
     this.structure = newStructure
   }
-  getBinary(
-    structure: BinaryString<BrickStruct> = this.structure,
-    x: number = this.x
-  ) {
-    const binary: number[] = []
-    const len = structure[0].length
-    const carry = gameParam.column - x - len
-    for (let i = len - 1; i >= 0; i--) {
-      let r
+  getBinary(structure = this.structure, x: number = this.x) {
+    const carry = gameParam.column - x - structure.length
+    return structure.map((v) => {
       if (carry >= 0) {
-        r = parseInt(structure[i], 2) << carry
-      } else {
-        r = parseInt(structure[i], 2) >> -carry
+        return v << carry
       }
-      binary.unshift(r)
-    }
-    return binary
+      return v >> -carry
+    })
   }
   correctLastTime(time: number) {
     this.lastTime = time
@@ -157,7 +151,8 @@ export class Brick implements IBrick {
     }
     for (let i = binary.length - 1; i >= 0; i--) {
       if (y + i < 0) continue
-      if (binary[i] & (mapBinary[y + i] ?? 2 ** gameParam.column - 1)) {
+      //mapBinary[y + i] 可能的情况为0 或者 undefined(因为brick.structure有全0排列)
+      if (binary[i] & (mapBinary[y + i] ?? eliminateTarget)) {
         return true
       }
     }
@@ -170,7 +165,7 @@ export class Brick implements IBrick {
    */
   private isAtBorder(direction: "left" | "right") {
     const binary = this.getBinary()
-    const maxBorderBinaryValue = { left: 2 ** (gameParam.column - 1), right: 1 }
+    const maxBorderBinaryValue = { left: (eliminateTarget + 1) / 2, right: 1 }
     for (let i = binary.length - 1; i >= 0; i--) {
       if (binary[i] & maxBorderBinaryValue[direction]) {
         return true
