@@ -12,7 +12,6 @@ export type GameParam = {
   readonly FPS: number | null
   speed: number
   keySpeed: number
-  score: number
 }
 
 export type OperateEvents = {

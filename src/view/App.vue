@@ -2,7 +2,7 @@
   <div
     class="m-auto relative flex flex-row w-min h-min bg-gradient-to-t from-[rgb(225,230,217)] to-[rgb(248,253,239)]">
     <div
-      class="relative h-[80vh] aspect-[9/18] flex border-r-[3px] border-[rgb(186 187 188)] rounded-lg overflow-hidden"
+      class="relative h-[80vh] aspect-[9/18] flex border-r-[3px] border-[rgb(186,187,188)] rounded-lg overflow-hidden"
       ref="gameRef">
       <button
         class="btn btn-primary btn-lg m-auto z-10"
