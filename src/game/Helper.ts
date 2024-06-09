@@ -92,8 +92,8 @@ class Helper {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     drawBrick(ctx, { ...brick, x: 0, y: 0 } as IBrick)
   }
-  computeScore(row: number) {
-    switch (row) {
+  computeScore(eliminateNum: number) {
+    switch (eliminateNum) {
       case 0:
         return 20
       case 1:

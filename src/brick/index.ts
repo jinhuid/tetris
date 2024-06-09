@@ -33,7 +33,8 @@ export class Brick implements IBrick {
     this.width = Brick.width
     this.height = Brick.height
     this.structure = getStructureVal(bricks[this.letter].struct)
-    this.x = gameParam.column / 2 - 1
+    this.x =
+      Math.floor(gameParam.column / 2) - Math.floor(this.structure.length / 2)
     this.y = getY(this.structure)
   }
   draw(ctx: CanvasRenderingContext2D) {
@@ -111,8 +112,7 @@ export class Brick implements IBrick {
         j = 0
       }
     }
-    const newBinary = this.getBinary(newStructure)
-    if (this.isOverlap(mapBinary, newBinary)) return
+    if (this.isOverlap(mapBinary, this.getBinary(newStructure))) return
     this.structure = newStructure
   }
   getBinary(structure = this.structure, x: number = this.x) {
@@ -149,14 +149,11 @@ export class Brick implements IBrick {
         binary = binary.map((b) => b << -shift)
       }
     }
-    for (let i = binary.length - 1; i >= 0; i--) {
-      if (y + i < 0) continue
-      //mapBinary[y + i] 可能的情况为0 或者 undefined(因为brick.structure有全0排列)
-      if (binary[i] & (mapBinary[y + i] ?? eliminateTarget)) {
-        return true
-      }
-    }
-    return false
+    //mapBinary[y + i] 可能的情况为0 或者 undefined(这时以b&eliminateTarget会返回true b为0时不会)
+    return binary.some((b, i) => {
+      if (y + i < 0) return false
+      if (b & (mapBinary[y + i] ?? eliminateTarget)) return true
+    })
   }
   /**
    *
@@ -165,12 +162,7 @@ export class Brick implements IBrick {
    */
   private isAtBorder(direction: "left" | "right") {
     const binary = this.getBinary()
-    const maxBorderBinaryValue = { left: (eliminateTarget + 1) / 2, right: 1 }
-    for (let i = binary.length - 1; i >= 0; i--) {
-      if (binary[i] & maxBorderBinaryValue[direction]) {
-        return true
-      }
-    }
-    return false
+    const target = direction === "left" ? (eliminateTarget + 1) / 2 : 1
+    return binary.some((b) => b & target)
   }
 }

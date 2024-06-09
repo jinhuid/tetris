@@ -1,6 +1,6 @@
 <template>
   <div
-    class="m-auto relative flex flex-row w-min h-min bg-gradient-to-t from-[rgb(225,230,217)] to-[rgb(248,253,239)]">
+    class="relative flex flex-row size-min bg-gradient-to-t from-[rgb(225,230,217)] to-[rgb(248,253,239)] m-auto">
     <div
       class="relative h-[80vh] aspect-[9/18] flex border-r-[3px] border-[rgb(186,187,188)] rounded-lg overflow-hidden"
       ref="gameRef">
@@ -24,21 +24,21 @@
           <span class="loading loading-ring loading-sm"></span>
         </div>
       </div>
-      <canvas class="absolute h-full w-full" ref="brickRef"></canvas>
-      <canvas class="absolute h-full w-full" ref="bgRef"></canvas>
+      <canvas class="absolute size-full" ref="brickRef"></canvas>
+      <canvas class="absolute size-full" ref="bgRef"></canvas>
     </div>
-    <div class="flex flex-col w-min rounded-md ml-4 mr-4">
+    <div class="flex flex-col w-min rounded-md mx-4">
       <canvas
-        class="size-20 bg-[#e8e2d58c] rounded-md mb-4 mt-4"
+        class="size-20 bg-[#e8e2d58c] rounded-md my-4"
         ref="nextBrickRef"></canvas>
       <div class="stats stats-vertical shadow w-20">
-        <div class="stat p-0 pt-3 pb-3">
+        <div class="stat p-0 py3">
           <div class="stat-title text-center">得分:</div>
           <div class="stat-value text-center text-base">
             {{ game?.state.score || 0 }}
           </div>
         </div>
-        <div class="stat p-0 pt-3 pb-3">
+        <div class="stat p-0 py-3">
           <div class="stat-title text-center">消除行：</div>
           <div class="stat-value text-center text-base">
             {{ game?.state.eliminateNum || 0 }}
@@ -72,7 +72,7 @@ const brickRef = ref<HTMLCanvasElement>()
 const bgRef = ref<HTMLCanvasElement>()
 const nextBrickRef = ref<HTMLCanvasElement>()
 
-let game = shallowRef<IGame>()
+const game = shallowRef<IGame>()
 onMounted(async () => {
   const { initConfig } = await import("../gameConfig")
   const { width, height } = gameRef.value!.getBoundingClientRect()
@@ -87,4 +87,5 @@ onMounted(async () => {
   game.value = new Game()
   console.log(game)
 })
+
 </script>

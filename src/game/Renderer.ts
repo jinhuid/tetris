@@ -46,7 +46,7 @@ export default class Renderer implements IGameRenderer {
     if (this.over) {
       return
     }
-    this.clearCanvas(this._canvasWithMapCtx.brickCtx)
+    this.clearCanvas(this.canvasWithMapCtx.brickCtx)
     this.lastTime = time
     this.draw()
     this.update(time - this.pauseTime)
@@ -56,12 +56,12 @@ export default class Renderer implements IGameRenderer {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
   private draw() {
-    this.operation.brick.draw(this._canvasWithMapCtx.brickCtx)
+    this.operation.brick.draw(this.canvasWithMapCtx.brickCtx)
   }
   private update(time: number) {
     const shouldNextOne = this.operation.brick.update(
       time,
-      this._canvasWithMapCtx.mapBinary
+      this.canvasWithMapCtx.mapBinary
     )
     if (shouldNextOne) {
       this.operation.brick.isRecycle = true
@@ -77,8 +77,8 @@ export default class Renderer implements IGameRenderer {
    */
   private replaceNextOne(time: number) {
     const isSuccess = this.gameHelper.record(
-      this._canvasWithMapCtx.mapBinary,
-      this._canvasWithMapCtx.bg,
+      this.canvasWithMapCtx.mapBinary,
+      this.canvasWithMapCtx.bg,
       this.brick
     )
     if (!isSuccess) {
@@ -87,18 +87,18 @@ export default class Renderer implements IGameRenderer {
       return
     }
     const eliminateNum = this.gameHelper.eliminate(
-      this._canvasWithMapCtx.mapBinary,
-      this._canvasWithMapCtx.bg,
+      this.canvasWithMapCtx.mapBinary,
+      this.canvasWithMapCtx.bg,
       this.brick.y,
       Math.min(
         this.brick.y + this.brick.structure.length,
-        this._canvasWithMapCtx.mapBinary.length
+        this.canvasWithMapCtx.mapBinary.length
       )
     )
     console.time("drawBg")
     this.gameHelper.drawBg(
-      this._canvasWithMapCtx.bgCtx,
-      this._canvasWithMapCtx.bg,
+      this.canvasWithMapCtx.bgCtx,
+      this.canvasWithMapCtx.bg,
       Brick.width,
       Brick.height
     )

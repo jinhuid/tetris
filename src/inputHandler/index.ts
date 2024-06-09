@@ -17,6 +17,8 @@ type Control = keyof typeof control.operate
 
 let activeKey: MoveKeys | PauseKeys | null = null
 window.onkeydown = (e) => {
+  //处理一下 button聚焦时 点击space会触发点击的事件
+  document.activeElement === e.target && e.preventDefault()
   switch (true) {
     case control.pause.some((item) => item === e.key):
       activeKey = e.key as PauseKeys
