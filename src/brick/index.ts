@@ -167,11 +167,11 @@ export class Brick implements IBrick {
    */
   private isOverlap(
     mapBinary: number[],
-    binary = this.getBinary(),
+    binary: number[],
     x: number = this.point.x,
     y: number = this.point.y
   ) {
-    if (x - this.point.x !== 0) {
+    if (x !== this.point.x) {
       const shift = x - this.point.x
       if (shift > 0) {
         binary = binary.map((b) => b >> shift)
