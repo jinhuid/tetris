@@ -96,7 +96,7 @@ class Helper {
 
   drawNextBrick(ctx: CanvasRenderingContext2D, brick: IBrick) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-    this.drawBrick(ctx, { ...brick, x: 0, y: 0 } as IBrick)
+    this.drawBrick(ctx, { ...brick, point: { x: 0, y: 0 } })
   }
   computeScore(eliminateNum: number) {
     switch (eliminateNum) {
