@@ -12,25 +12,30 @@ const cache: Record<string, number> = {}
 
 export const drawBrickPiece = (
   ctx: CanvasRenderingContext2D,
-  { x, y, width, height, color }: IBrick
+  { point, width, height, color }: IBrick,
+  globalAlpha: number = 1
 ) => {
   if (color in cache) {
+    ctx.globalAlpha = globalAlpha
     ctx.drawImage(
       offsetCanvas,
       0,
       height * cache[color],
       width,
       height,
-      x,
-      y,
+      point.x,
+      point.y,
       width,
       height
     )
+    ctx.globalAlpha = 1
     return
   }
   drawStyle(offsetCtx, {
-    x: 0,
-    y: index * height,
+    point: {
+      x: 0,
+      y: index * height,
+    },
     width,
     height,
     color,
@@ -42,8 +47,8 @@ export const drawBrickPiece = (
     height * cache[color],
     width,
     height,
-    x,
-    y,
+    point.x,
+    point.y,
     width,
     height
   )

@@ -28,10 +28,10 @@ class Helper {
     const binary = brick.getBinary()
     for (let i = binary.length - 1; i >= 0; i--) {
       if (binary[i] === 0) continue
-      mapBinary[brick.y + i] |= binary[i]
+      mapBinary[brick.point.y + i] |= binary[i]
       for (let j = gameParam.column - 1, r = binary[i]; r !== 0; j--, r >>= 1) {
         if (r & 1) {
-          bg[brick.y + i][j] = brick.color
+          bg[brick.point.y + i][j] = brick.color
         }
       }
     }
@@ -64,7 +64,7 @@ class Helper {
     // 这里只需要判断方块是否超出顶部即可 判断方块的每一行下标是不是越界(及y小于0)
     const len = brick.structure.length
     for (let i = 0; i < len; i++) {
-      if (brick.y + i < 0) return true
+      if (brick.point.y + i < 0) return true
     }
     return false
   }
@@ -79,8 +79,10 @@ class Helper {
       for (let j = 0; j < colors[i].length; j++) {
         if (colors[i][j] === void 0) continue
         drawBrickPiece(ctx, {
-          x: j * brickWidth,
-          y: i * brickHeight,
+          point: {
+            x: j * brickWidth,
+            y: i * brickHeight,
+          },
           width: brickWidth,
           height: brickHeight,
           color: colors[i][j],
@@ -88,9 +90,13 @@ class Helper {
       }
     }
   }
+  drawBrick(ctx: CanvasRenderingContext2D, brick: IBrick, globalAlpha = 1) {
+    drawBrick(ctx, brick, globalAlpha)
+  }
+
   drawNextBrick(ctx: CanvasRenderingContext2D, brick: IBrick) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-    drawBrick(ctx, { ...brick, x: 0, y: 0 } as IBrick)
+    this.drawBrick(ctx, { ...brick, x: 0, y: 0 } as IBrick)
   }
   computeScore(eliminateNum: number) {
     switch (eliminateNum) {

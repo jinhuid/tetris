@@ -50,16 +50,20 @@ export type Bricks = {
   }
 }
 
-export interface IBrick {
-  letter: BrickLetter
+export interface Point {
   x: number
   y: number
+}
+
+export interface IBrick {
+  letter: BrickLetter
+  point:Point
+  landingPoint:Point
   width: number
   height: number
   color: BrickColor
   structure: Readonly<number[]>
   isRecycle: boolean
-  draw(ctx: CanvasRenderingContext2D): void
   update(time: number, mapBinary: number[]): boolean
   getBinary(): number[]
   left(mapBinary: number[]): void

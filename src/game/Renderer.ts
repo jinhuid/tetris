@@ -4,6 +4,7 @@ import { GameHelper, gameHelper } from "./Helper"
 import { userActions } from "../inputHandler"
 import Operation from "../inputHandler/Operation"
 import { ICanvasWithMapCtx, IGameRenderer, IGame } from "../types"
+import { gameParam } from "../gameConfig"
 
 export default class Renderer implements IGameRenderer {
   private operation: Operation
@@ -22,11 +23,16 @@ export default class Renderer implements IGameRenderer {
     this.game = game
     this._brick = new Brick(this.gameHelper.getRandomLetter())
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
-    this.operation = new Operation(this.game, this._canvasWithMapCtx, this.brick, {
-      playGame: this.playGame.bind(this),
-      pauseGame: this.pauseGame.bind(this),
-      togglePause: this.togglePause.bind(this),
-    })
+    this.operation = new Operation(
+      this.game,
+      this._canvasWithMapCtx,
+      this.brick,
+      {
+        playGame: this.playGame.bind(this),
+        pauseGame: this.pauseGame.bind(this),
+        togglePause: this.togglePause.bind(this),
+      }
+    )
   }
   get canvasWithMapCtx() {
     return this._canvasWithMapCtx
@@ -56,7 +62,29 @@ export default class Renderer implements IGameRenderer {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
   private draw() {
-    this.operation.brick.draw(this.canvasWithMapCtx.brickCtx)
+    if (gameParam.showLandingPoint) {
+      this.draw = this.drawWithLandingPoint
+    } else {
+      this.draw = this.drawWithoutLandingPoint
+    }
+    this.draw()
+  }
+  private drawWithLandingPoint() {
+    if (!this.brick.landingPoint) {
+      this.brick.computeLandingPoint(this.canvasWithMapCtx.mapBinary)
+    }
+    this.gameHelper.drawBrick(this.canvasWithMapCtx.brickCtx, this.brick)
+    this.gameHelper.drawBrick(
+      this.canvasWithMapCtx.brickCtx,
+      {
+        ...this.brick,
+        point: this.brick.landingPoint,
+      } as Brick,
+      0.3
+    )
+  }
+  private drawWithoutLandingPoint() {
+    this.gameHelper.drawBrick(this.canvasWithMapCtx.brickCtx, this.brick)
   }
   private update(time: number) {
     const shouldNextOne = this.operation.brick.update(
@@ -89,9 +117,9 @@ export default class Renderer implements IGameRenderer {
     const eliminateNum = this.gameHelper.eliminate(
       this.canvasWithMapCtx.mapBinary,
       this.canvasWithMapCtx.bg,
-      this.brick.y,
+      this.brick.point.y,
       Math.min(
-        this.brick.y + this.brick.structure.length,
+        this.brick.point.y + this.brick.structure.length,
         this.canvasWithMapCtx.mapBinary.length
       )
     )
@@ -106,6 +134,7 @@ export default class Renderer implements IGameRenderer {
     const score = this.gameHelper.computeScore(eliminateNum)
     this._brick = this.nextBrick
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
+    // 这里因为绘制的时间点是依赖raf给我们回调传递的时间戳，而nextBrick一开始就创造了，所以这里的时间戳是不准确的
     this.brick.correctLastTime(time)
     this.operation.takeTurns(this.brick)
     this.game.state.setNextBrick(this.nextBrick, this)

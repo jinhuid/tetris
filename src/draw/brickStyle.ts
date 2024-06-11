@@ -3,10 +3,11 @@ import { IBrick } from "../types/brick"
 
 export const drawStyle = (
   ctx: CanvasRenderingContext2D,
-  { x, y, width, height, color }: IBrick
+  { point, width, height, color }: IBrick
 ) => {
-  const radius = height / 10/**弧度比例 */ * gameParam.devicePixelRatio // 圆角半径
-  const borderWidth = height / 25/**边框比例 */ * gameParam.devicePixelRatio // 边框宽度
+  const { x, y } = point
+  const radius = (height / 10) /**弧度比例 */ * gameParam.devicePixelRatio // 圆角半径
+  const borderWidth = (height / 25) /**边框比例 */ * gameParam.devicePixelRatio // 边框宽度
   // 绘制填充图形
   ctx.fillStyle = color
   ctx.beginPath()

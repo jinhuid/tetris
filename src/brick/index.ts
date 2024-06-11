@@ -1,6 +1,5 @@
-import { drawBrick } from "../draw"
 import { gameParam } from "../gameConfig"
-import { BrickColor, BrickStruct, Bricks, IBrick } from "../types/brick"
+import { BrickColor, BrickStruct, Bricks, IBrick, Point } from "../types/brick"
 import { bricks } from "./brickConfig"
 
 const getY = (structure: Readonly<number[]>) => {
@@ -22,8 +21,8 @@ export class Brick implements IBrick {
   readonly width: number
   readonly height: number
   structure: Readonly<number[]>
-  x: number
-  y: number
+  point: Point
+  landingPoint!: Point
   isRecycle = false
   constructor(
     public letter: keyof Bricks,
@@ -33,12 +32,19 @@ export class Brick implements IBrick {
     this.width = Brick.width
     this.height = Brick.height
     this.structure = getStructureVal(bricks[this.letter].struct)
-    this.x =
-      Math.floor(gameParam.column / 2) - Math.floor(this.structure.length / 2)
-    this.y = getY(this.structure)
+    this.point = {
+      x:
+        Math.floor(gameParam.column / 2) -
+        Math.floor(this.structure.length / 2),
+      y: getY(this.structure),
+    }
   }
-  draw(ctx: CanvasRenderingContext2D) {
-    drawBrick(ctx, this)
+  public computeLandingPoint(mapBinary: number[]) {
+    let y = this.point.y
+    while (!this.isOverlap(mapBinary, this.getBinary(), this.point.x, y + 1)) {
+      y++
+    }
+    this.landingPoint = { x: this.point.x, y }
   }
   /**
    * @param time 每帧调用时间戳
@@ -48,8 +54,15 @@ export class Brick implements IBrick {
   update(time: number, mapBinary: number[]) {
     if (time - this.lastTime >= 1000 / gameParam.speed) {
       this.lastTime = time - ((time - this.lastTime) % (1000 / gameParam.speed))
-      if (!this.isOverlap(mapBinary, this.getBinary(), this.x, this.y + 1)) {
-        this.y++
+      if (
+        !this.isOverlap(
+          mapBinary,
+          this.getBinary(),
+          this.point.x,
+          this.point.y + 1
+        )
+      ) {
+        this.point.y++
         return false
       } else {
         return true
@@ -59,14 +72,16 @@ export class Brick implements IBrick {
   }
   left(mapBinary: number[]) {
     if (this.isAtBorder("left")) return
-    if (!this.isOverlap(mapBinary, this.getBinary(), this.x - 1)) {
-      this.x--
+    if (!this.isOverlap(mapBinary, this.getBinary(), this.point.x - 1)) {
+      this.point.x--
+      this.computeLandingPoint(mapBinary)
     }
   }
   right(mapBinary: number[]) {
     if (this.isAtBorder("right")) return
-    if (!this.isOverlap(mapBinary, this.getBinary(), this.x + 1)) {
-      this.x++
+    if (!this.isOverlap(mapBinary, this.getBinary(), this.point.x + 1)) {
+      this.point.x++
+      this.computeLandingPoint(mapBinary)
     }
   }
   /**
@@ -75,15 +90,29 @@ export class Brick implements IBrick {
    * @returns 是否无法继续下落
    */
   downOne(mapBinary: number[]) {
-    if (!this.isOverlap(mapBinary, this.getBinary(), this.x, this.y + 1)) {
-      this.y++
+    if (
+      !this.isOverlap(
+        mapBinary,
+        this.getBinary(),
+        this.point.x,
+        this.point.y + 1
+      )
+    ) {
+      this.point.y++
       return false
     }
     return true
   }
   downToBottom(mapBinary: number[]) {
-    while (!this.isOverlap(mapBinary, this.getBinary(), this.x, this.y + 1)) {
-      this.y++
+    while (
+      !this.isOverlap(
+        mapBinary,
+        this.getBinary(),
+        this.point.x,
+        this.point.y + 1
+      )
+    ) {
+      this.point.y++
     }
     return true
   }
@@ -98,9 +127,9 @@ export class Brick implements IBrick {
         const y = len - 1 - j
         //边界检测
         if (
-          x + this.x >= gameParam.column ||
-          x + this.x < 0 ||
-          y + this.y >= gameParam.row
+          x + this.point.x >= gameParam.column ||
+          x + this.point.x < 0 ||
+          y + this.point.y >= gameParam.row
         ) {
           return
         }
@@ -114,8 +143,9 @@ export class Brick implements IBrick {
     }
     if (this.isOverlap(mapBinary, this.getBinary(newStructure))) return
     this.structure = newStructure
+    this.computeLandingPoint(mapBinary)
   }
-  getBinary(structure = this.structure, x: number = this.x) {
+  getBinary(structure = this.structure, x: number = this.point.x) {
     const carry = gameParam.column - x - structure.length
     return structure.map((v) => {
       if (carry >= 0) {
@@ -138,11 +168,11 @@ export class Brick implements IBrick {
   private isOverlap(
     mapBinary: number[],
     binary = this.getBinary(),
-    x: number = this.x,
-    y: number = this.y
+    x: number = this.point.x,
+    y: number = this.point.y
   ) {
-    if (x - this.x !== 0) {
-      const shift = x - this.x
+    if (x - this.point.x !== 0) {
+      const shift = x - this.point.x
       if (shift > 0) {
         binary = binary.map((b) => b >> shift)
       } else {

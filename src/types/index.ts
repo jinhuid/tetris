@@ -10,6 +10,7 @@ export type GameParam = {
   readonly brickWidth: number
   readonly brickHeight: number
   readonly FPS: number | null
+  readonly showLandingPoint: boolean
   speed: number
   keySpeed: number
 }

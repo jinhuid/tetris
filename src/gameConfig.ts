@@ -28,4 +28,5 @@ export const gameParam: GameParam = {
   get windowHeight() {
     return this.brickHeight * this.row
   },
+  showLandingPoint: true,
 }
