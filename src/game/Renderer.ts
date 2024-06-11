@@ -12,17 +12,17 @@ export default class Renderer implements IGameRenderer {
   private lastTime = 0
   private pauseTime = 0
   private game: IGame
-  private _brick: Brick
-  private _nextBrick: Brick
   private over: boolean = false
   private pause: boolean = false
-  _canvasWithMapCtx: ICanvasWithMapCtx
+  private _brick: Brick
+  private _nextBrick: Brick
+  private _canvasWithMapCtx: ICanvasWithMapCtx
   constructor(game: IGame) {
-    this._canvasWithMapCtx = new CanvasWithMapCtx()
     this.gameHelper = gameHelper
     this.game = game
     this._brick = new Brick(this.gameHelper.getRandomLetter())
     this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
+    this._canvasWithMapCtx = new CanvasWithMapCtx()
     this.operation = new Operation(
       this.game,
       this._canvasWithMapCtx,
