@@ -32,7 +32,7 @@
         class="size-20 bg-[#e8e2d58c] rounded-md my-4"
         ref="nextBrickRef"></canvas>
       <div class="stats stats-vertical shadow w-20">
-        <div class="stat p-0 py3">
+        <div class="stat p-0 py-3">
           <div class="stat-title text-center">得分:</div>
           <div class="stat-value text-center text-base">
             {{ game?.state.score || 0 }}
