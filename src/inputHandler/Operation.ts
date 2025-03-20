@@ -25,7 +25,7 @@ export default class Operation implements OperateEvents {
   downOne() {
     const shouldNextOne = this.brick.downOne(this.canvasWithMapCtx.mapBinary)
     if (shouldNextOne) {
-      this.brick.isRecycle = true
+      this.brick.setRecycle()
     }
   }
   downToBottom() {
@@ -33,7 +33,7 @@ export default class Operation implements OperateEvents {
       this.canvasWithMapCtx.mapBinary
     )
     if (shouldNextOne) {
-      this.brick.isRecycle = true
+      this.brick.setRecycle()
     }
   }
   rotate() {

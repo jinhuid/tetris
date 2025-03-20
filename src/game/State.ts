@@ -1,11 +1,11 @@
 import { shallowReactive } from "vue"
-import { Brick } from "../brick"
 import { IGameRenderer, IGameState } from "../types"
 import { SinglePattern } from "../utils"
 import { gameHelper } from "./Helper"
+import type { BaseBrick } from "../brick"
 
 class State implements IGameState {
-  private _nextBrick!: Brick | null
+  private _nextBrick!: BaseBrick | null
   private _over!: boolean
   private _pause!: boolean
   private _score!: number
@@ -40,7 +40,7 @@ class State implements IGameState {
   get playing() {
     return this._playing
   }
-  setNextBrick(brick: Brick | null, renderer: IGameRenderer) {
+  setNextBrick(brick: BaseBrick | null, renderer: IGameRenderer) {
     this._nextBrick = brick
     if (brick) {
       gameHelper.drawNextBrick(renderer.canvasWithMapCtx.nextBrickCtx, brick)

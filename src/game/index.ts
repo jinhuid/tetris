@@ -3,21 +3,18 @@ import Renderer from "./Renderer"
 import { IGame, IGameRenderer, IGameState } from "../types"
 import { customRaf } from "../utils"
 import gameState from "./State"
+import { BaseBrick } from "../brick"
 
 export default class Game implements IGame {
   private renderer: IGameRenderer
-  private _state: IGameState
   private startWithEnd!: readonly [IGame["startGame"], IGame["cancelGame"]]
   private startRaf!: () => void
   private cancelRaf!: () => void
+  public state: IGameState
   constructor() {
     this.renderer = new Renderer(this)
-    this._state = gameState
+    this.state = gameState
     this.defineRaf(this.renderer)
-  }
-
-  get state() {
-    return this._state
   }
   private defineRaf(renderer: IGameRenderer) {
     this.startWithEnd = customRaf((time: number = performance.now()) => {
@@ -29,7 +26,10 @@ export default class Game implements IGame {
   startGame() {
     this.startRaf()
     this.state.setPlaying(true)
-    this.state.setNextBrick(this.renderer.nextBrick, this.renderer)
+    this.state.setNextBrick(
+      new BaseBrick(this.renderer.nextBrickLetter),
+      this.renderer
+    )
   }
   cancelGame() {
     this.cancelRaf()
@@ -41,7 +41,10 @@ export default class Game implements IGame {
     this.defineRaf(this.renderer)
     this.startRaf()
     this.state.setPlaying(true)
-    this.state.setNextBrick(this.renderer.nextBrick, this.renderer)
+    this.state.setNextBrick(
+      new BaseBrick(this.renderer.nextBrickLetter),
+      this.renderer
+    )
   }
   playGame() {
     this.renderer.playGame()

@@ -1,5 +1,5 @@
-import { Brick } from "../brick"
-import { BrickColor } from "./brick"
+import type { BaseBrick } from "../brick"
+import { BrickColor, type BrickLetter, type IBrick } from "./brick"
 
 export type GameParam = {
   readonly windowWidth: number
@@ -40,8 +40,8 @@ export interface PlayWithPause {
 
 export interface IGameRenderer extends PlayWithPause {
   readonly canvasWithMapCtx: ICanvasWithMapCtx
-  readonly brick: Brick
-  readonly nextBrick: Brick
+  readonly brick: IBrick
+  readonly nextBrickLetter: BrickLetter
   render: (time: number) => void
 }
 
@@ -53,14 +53,14 @@ export interface IGame extends PlayWithPause {
 }
 
 export interface IGameState {
-  readonly nextBrick: Brick | null
+  readonly nextBrick: BaseBrick | null
   readonly over: boolean
   readonly pause: boolean
   readonly score: number
   readonly playing: boolean
   readonly eliminateNum: number
   initState: () => void
-  setNextBrick: (brick: Brick | null, renderer: IGameRenderer) => void
+  setNextBrick: (brick: BaseBrick | null, renderer: IGameRenderer) => void
   setOver: () => void
   setPause: (pause: boolean) => void
   setScore: (score: number) => void

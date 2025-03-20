@@ -1,9 +1,10 @@
+import type { BaseBrick } from "../brick"
 import { bricks } from "../brick/brickConfig"
 import { drawBrick } from "../draw"
 import { drawBrickPiece } from "../draw/drawBrickPiece"
 import { gameParam } from "../gameConfig"
 import { ICanvasWithMapCtx } from "../types"
-import { BrickLetter, IBrick } from "../types/brick"
+import { BrickLetter, IBrick, type IPoint } from "../types/brick"
 import { SinglePattern } from "../utils"
 
 class Helper {
@@ -25,7 +26,7 @@ class Helper {
     if (this.isGameOver(brick)) {
       return false
     }
-    const binary = brick.getBinary()
+    const binary = brick.getStructWithOffset()
     for (let i = binary.length - 1; i >= 0; i--) {
       if (binary[i] === 0) continue
       mapBinary[brick.point.y + i] |= binary[i]
@@ -90,13 +91,18 @@ class Helper {
       }
     }
   }
-  drawBrick(ctx: CanvasRenderingContext2D, brick: IBrick, globalAlpha = 1) {
-    drawBrick(ctx, brick, globalAlpha)
+  drawBrick(
+    ctx: CanvasRenderingContext2D,
+    brick: BaseBrick,
+    position: IPoint,
+    globalAlpha: number
+  ) {
+    drawBrick(ctx, brick, globalAlpha, position)
   }
 
-  drawNextBrick(ctx: CanvasRenderingContext2D, brick: IBrick) {
+  drawNextBrick(ctx: CanvasRenderingContext2D, brick: BaseBrick) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-    this.drawBrick(ctx, { ...brick, point: { x: 0, y: 0 } })
+    this.drawBrick(ctx, brick, { x: 0, y: 0 }, 1)
   }
   computeScore(eliminateNum: number) {
     switch (eliminateNum) {

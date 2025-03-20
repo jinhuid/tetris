@@ -50,22 +50,23 @@ export type Bricks = {
   }
 }
 
-export interface Point {
+export interface IPoint {
   x: number
   y: number
 }
 
 export interface IBrick {
-  letter: BrickLetter
-  point:Point
-  landingPoint:Point
-  width: number
-  height: number
-  color: BrickColor
-  structure: Readonly<number[]>
-  isRecycle: boolean
+  readonly letter: BrickLetter
+  readonly point: Readonly<IPoint>
+  readonly landingPoint: Readonly<IPoint>
+  readonly width: number
+  readonly height: number
+  readonly color: BrickColor
+  readonly structure: ReadonlyArray<number>
+  readonly isRecycle: boolean
+  setRecycle(): void
   update(time: number, mapBinary: number[]): boolean
-  getBinary(): number[]
+  getStructWithOffset(): number[]
   left(mapBinary: number[]): void
   right(mapBinary: number[]): void
   downOne(mapBinary: number[]): boolean

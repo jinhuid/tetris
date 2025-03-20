@@ -1,10 +1,11 @@
-import { Brick } from "../brick"
+import { BaseBrick, Brick } from "../brick"
 import CanvasWithMapCtx from "./CanvasWithMapCtx"
 import { GameHelper, gameHelper } from "./Helper"
 import { userActions } from "../inputHandler"
 import Operation from "../inputHandler/Operation"
 import { ICanvasWithMapCtx, IGameRenderer, IGame } from "../types"
 import { gameParam } from "../gameConfig"
+import type { BrickLetter } from "../types/brick"
 
 export default class Renderer implements IGameRenderer {
   private operation: Operation
@@ -14,18 +15,21 @@ export default class Renderer implements IGameRenderer {
   private game: IGame
   private over: boolean = false
   private pause: boolean = false
-  private _brick: Brick
-  private _nextBrick: Brick
-  private _canvasWithMapCtx: ICanvasWithMapCtx
+  public canvasWithMapCtx: ICanvasWithMapCtx
+  public brick: Brick
+  public nextBrickLetter: BrickLetter
   constructor(game: IGame) {
     this.gameHelper = gameHelper
     this.game = game
-    this._brick = new Brick(this.gameHelper.getRandomLetter())
-    this._nextBrick = new Brick(this.gameHelper.getRandomLetter())
-    this._canvasWithMapCtx = new CanvasWithMapCtx()
+    this.canvasWithMapCtx = new CanvasWithMapCtx()
+    this.brick = new Brick(
+      this.gameHelper.getRandomLetter(),
+      this.canvasWithMapCtx.mapBinary
+    )
+    this.nextBrickLetter = this.gameHelper.getRandomLetter()
     this.operation = new Operation(
       this.game,
-      this._canvasWithMapCtx,
+      this.canvasWithMapCtx,
       this.brick,
       {
         playGame: this.playGame.bind(this),
@@ -33,15 +37,6 @@ export default class Renderer implements IGameRenderer {
         togglePause: this.togglePause.bind(this),
       }
     )
-  }
-  get canvasWithMapCtx() {
-    return this._canvasWithMapCtx
-  }
-  get brick() {
-    return this._brick
-  }
-  get nextBrick() {
-    return this._nextBrick
   }
   render(time: number) {
     this.userActions()
@@ -69,22 +64,22 @@ export default class Renderer implements IGameRenderer {
     }
     this.draw()
   }
-  private drawWithLandingPoint() {
-    if (!this.brick.landingPoint) {
-      this.brick.computeLandingPoint(this.canvasWithMapCtx.mapBinary)
-    }
-    this.gameHelper.drawBrick(this.canvasWithMapCtx.brickCtx, this.brick)
+  private drawWithoutLandingPoint() {
     this.gameHelper.drawBrick(
       this.canvasWithMapCtx.brickCtx,
-      {
-        ...this.brick,
-        point: this.brick.landingPoint,
-      } as Brick,
-      0.3
+      this.brick,
+      this.brick.point,
+      1
     )
   }
-  private drawWithoutLandingPoint() {
-    this.gameHelper.drawBrick(this.canvasWithMapCtx.brickCtx, this.brick)
+  private drawWithLandingPoint() {
+    this.drawWithoutLandingPoint()
+    this.gameHelper.drawBrick(
+      this.canvasWithMapCtx.brickCtx,
+      this.brick,
+      this.brick.landingPoint,
+      0.3
+    )
   }
   private update(time: number) {
     const shouldNextOne = this.operation.brick.update(
@@ -92,7 +87,7 @@ export default class Renderer implements IGameRenderer {
       this.canvasWithMapCtx.mapBinary
     )
     if (shouldNextOne) {
-      this.operation.brick.isRecycle = true
+      this.operation.brick.setRecycle()
     }
   }
   private checkBrickState(time: number) {
@@ -132,12 +127,14 @@ export default class Renderer implements IGameRenderer {
     )
     console.timeEnd("drawBg")
     const score = this.gameHelper.computeScore(eliminateNum)
-    this._brick = this.nextBrick
-    this._nextBrick = new Brick(this.gameHelper.getRandomLetter(), time)
-    // 这里因为绘制的时间点是依赖raf给我们回调传递的时间戳，而nextBrick一开始就创造了，所以这里的时间戳是不准确的
-    this.brick.correctLastTime(time)
+    this.brick = new Brick(
+      this.nextBrickLetter,
+      this.canvasWithMapCtx.mapBinary,
+      time
+    )
+    this.nextBrickLetter = this.gameHelper.getRandomLetter()
     this.operation.takeTurns(this.brick)
-    this.game.state.setNextBrick(this.nextBrick, this)
+    this.game.state.setNextBrick(new BaseBrick(this.nextBrickLetter), this)
     this.game.state.setScore(score + this.game.state.score)
     this.game.state.setEliminateNum(eliminateNum + this.game.state.eliminateNum)
   }
